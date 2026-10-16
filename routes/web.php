@@ -10,10 +10,6 @@ Route::get('/', function () {
 
 
 
-
-
-
-
 Route::get('/', fn () => Inertia::render('Home'))
     ->name('home');
 
