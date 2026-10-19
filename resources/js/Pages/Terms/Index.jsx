@@ -1,250 +1,267 @@
 
-import { useMemo, useState } from 'react';
-import { Link } from '@inertiajs/react';
-import { Search, BookOpen, ChevronRight, CheckCircle2 } from 'lucide-react';
-import PublicLayout from '../../Components/PublicLayout';
+import { Head, Link, router } from '@inertiajs/react';
+import { Search, Plus, Eye, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import Modal from '@/Components/Modal';
+import CreateTermForm from './CreateTermForm';
 
-const terms = [
-    {
-        id: 1,
-        term: 'Радиочастотный спектр',
-        en: 'Radio-frequency spectrum',
-        uz: 'Radiochastota spektri',
-        category: 'Радиочастотный спектр',
-        definition: 'Совокупность радиочастот, используемых для радиосвязи и других радиотехнологий.',
-        source: 'Регламент радиосвязи ITU',
-        status: 'Проверено',
-    },
-    {
-        id: 2,
-        term: 'Полоса частот',
-        en: 'Frequency band',
-        uz: 'Chastotalar polosasi',
-        category: 'Радиочастотный спектр',
-        definition: 'Участок радиочастотного спектра, ограниченный двумя заданными частотами.',
-        source: 'Регламент радиосвязи ITU',
-        status: 'Проверено',
-    },
-    {
-        id: 3,
-        term: 'Радиослужба',
-        en: 'Radiocommunication service',
-        uz: 'Radi aloqa xizmati',
-        category: 'Радиосвязь',
-        definition: 'Служба передачи, излучения и приёма радиоволн для установленных целей.',
-        source: 'Регламент радиосвязи ITU',
-        status: 'Проверено',
-    },
-    {
-        id: 4,
-        term: 'Электромагнитная совместимость',
-        en: 'Electromagnetic compatibility',
-        uz: 'Elektromagnit moslashuv',
-        category: 'Телекоммуникации',
-        definition: 'Способность оборудования работать без недопустимых электромагнитных помех.',
-        source: 'Технический словарь',
-        status: 'На проверке',
-    },
-    {
-        id: 5,
-        term: 'Присвоение радиочастоты',
-        en: 'Frequency assignment',
-        uz: 'Radiochastotani biriktirish',
-        category: 'Радиочастотный спектр',
-        definition: 'Разрешение на использование радиочастоты или радиочастотного канала в установленных условиях.',
-        source: 'Регламент радиосвязи ITU',
-        status: 'Проверено',
-    },
-    {
-        id: 6,
-        term: 'Международный союз электросвязи',
-        en: 'International Telecommunication Union',
-        uz: 'Xalqaro elektraloqa ittifoqi',
-        category: 'Стандарты ITU',
-        definition: 'Специализированное учреждение ООН в области информационно-коммуникационных технологий.',
-        source: 'Официальные материалы ITU',
-        status: 'Проверено',
-    },
-];
+const statuses = {
+    draft: 'Черновик',
+    published: 'Опубликован',
+    archived: 'В архиве',
+};
 
-export default function Index() {
-    const [query, setQuery] = useState('');
-    const [category, setCategory] = useState('Все категории');
-    const [language, setLanguage] = useState('Все языки');
-    const [letter, setLetter] = useState('');
+const statusStyles = {
+    draft: 'bg-gray-100 text-gray-700',
+    published: 'bg-green-100 text-green-700',
+    archived: 'bg-amber-100 text-amber-700',
+};
 
-    const categories = [...new Set(terms.map((item) => item.category))];
+export default function Index({ terms, filters = {} }) {
+    const [search, setSearch] = useState(filters.search ?? '');
+    const [status, setStatus] = useState(filters.status ?? '');
+     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const filtered = useMemo(() => {
-        const q = query.trim().toLowerCase();
+    function submitSearch(e) {
+        e.preventDefault();
 
-        return terms.filter((item) => {
-            const matchesQuery =
-                !q ||
-                [item.term, item.en, item.uz, item.definition, item.source]
-                    .some((value) => value.toLowerCase().includes(q));
+        router.get(
+            '/terms',
+            { search, status },
+            { preserveState: true, preserveScroll: true, replace: true },
+        );
+    }
 
-            const matchesCategory =
-                category === 'Все категории' || item.category === category;
+    function changeStatus(value) {
+        setStatus(value);
 
-            const matchesLanguage =
-                language === 'Все языки' ||
-                (language === 'Русский' && item.term) ||
-                (language === 'English' && item.en) ||
-                (language === 'O‘zbekcha' && item.uz);
+        router.get(
+            '/terms',
+            { search, status: value },
+            { preserveState: true, preserveScroll: true, replace: true },
+        );
+    }
 
-            const matchesLetter =
-                !letter || item.term.toUpperCase().startsWith(letter);
-
-            return matchesQuery && matchesCategory && matchesLanguage && matchesLetter;
-        });
-    }, [query, category, language, letter]);
-
-    const letters = 'АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЭЯ'.split('');
+    const items = terms.data ?? [];
+    const links = terms.links ?? [];
 
     return (
-        <PublicLayout
-            title="Словарь терминов"
-            description="Ищите отраслевые термины, сравнивайте переводы и знакомьтесь с определениями из нормативных и технических источников."
-        >
-            <div className="mx-auto max-w-7xl px-5 py-10 lg:px-8">
-                <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-                    <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-5">
-                        <h2 className="font-semibold text-slate-900">Фильтры</h2>
+        <>
+            <Head title="Термины" />
 
-                        <label className="mt-5 block text-sm font-medium text-slate-700">
-                            Категория
-                        </label>
-                        <select
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value)}
-                            className="mt-2 w-full rounded-lg border-slate-200 text-sm"
-                        >
-                            <option>Все категории</option>
-                            {categories.map((item) => (
-                                <option key={item}>{item}</option>
-                            ))}
-                        </select>
-
-                        <label className="mt-5 block text-sm font-medium text-slate-700">
-                            Язык термина
-                        </label>
-                        <select
-                            value={language}
-                            onChange={(e) => setLanguage(e.target.value)}
-                            className="mt-2 w-full rounded-lg border-slate-200 text-sm"
-                        >
-                            <option>Все языки</option>
-                            <option>Русский</option>
-                            <option>English</option>
-                            <option>O‘zbekcha</option>
-                        </select>
+            <Modal
+                show={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                title="Добавить термин"
+            >
+                <CreateTermForm 
+                    onClose={() => setIsModalOpen(false)}
+                />
+            </Modal>
+            <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+                <div className="mx-auto max-w-7xl space-y-6">
+                    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                        <div>
+                            <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+                                Термины
+                            </h1>
+                            <p className="mt-1 text-sm text-gray-500">
+                                Управление терминологическим справочником
+                            </p>
+                        </div>
 
                         <button
                             type="button"
-                            onClick={() => {
-                                setQuery('');
-                                setCategory('Все категории');
-                                setLanguage('Все языки');
-                                setLetter('');
-                            }}
-                            className="mt-5 text-sm font-semibold text-blue-700 hover:text-blue-900"
+                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700"
+                            onClick={() => setIsModalOpen(true)}
                         >
-                            Сбросить фильтры
+                            <Plus size={18} />
+                            Добавить термин
                         </button>
-                    </aside>
+                    </div>
 
-                    <section>
-                        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-2">
-                            <Search className="ml-3 shrink-0 text-slate-400" size={21} />
-                            <input
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Поиск термина, определения или перевода..."
-                                className="min-w-0 flex-1 border-0 py-3 text-sm focus:ring-0"
-                            />
-                        </div>
+                    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                        <form
+                            onSubmit={submitSearch}
+                            className="flex flex-col gap-3 sm:flex-row"
+                        >
+                            <div className="relative flex-1">
+                                <Search
+                                    size={18}
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                                />
+                                <input
+                                    type="search"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Поиск терминов..."
+                                    className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                                />
+                            </div>
 
-                        <div className="mt-4 flex flex-wrap gap-1.5">
-                            <button
-                                onClick={() => setLetter('')}
-                                className={`rounded-md px-2.5 py-2 text-sm ${!letter ? 'bg-blue-700 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+                            <select
+                                value={status}
+                                onChange={(e) => changeStatus(e.target.value)}
+                                className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                             >
-                                Все
-                            </button>
-                            {letters.map((item) => (
-                                <button
-                                    key={item}
-                                    onClick={() => setLetter(letter === item ? '' : item)}
-                                    className={`rounded-md px-2.5 py-2 text-sm ${letter === item ? 'bg-blue-700 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
-                                >
-                                    {item}
-                                </button>
-                            ))}
-                        </div>
+                                <option value="">Все статусы</option>
+                                <option value="draft">Черновик</option>
+                                <option value="published">Опубликован</option>
+                                <option value="archived">В архиве</option>
+                            </select>
 
-                        <div className="mt-6 flex items-center justify-between">
-                            <h2 className="text-lg font-bold text-slate-900">
+                            <button
+                                type="submit"
+                                className="rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700"
+                            >
+                                Найти
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                        <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+                            <h2 className="font-semibold text-gray-900">
                                 Список терминов
                             </h2>
-                            <span className="text-sm text-slate-500">
-                                Найдено: {filtered.length}
+                            <span className="text-sm text-gray-500">
+                                Всего: {terms.total ?? items.length}
                             </span>
                         </div>
 
-                        <div className="mt-4 space-y-3">
-                            {filtered.map((item) => (
-                                <Link
-                                    key={item.id}
-                                    href={`/terms/${item.id}`}
-                                    className="group block rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-blue-200 hover:shadow-md"
-                                >
-                                    <div className="flex items-start justify-between gap-3">
-                                        <div>
-                                            <span className="text-xs font-semibold text-blue-700">
-                                                {item.category}
-                                            </span>
-                                            <h3 className="mt-2 text-lg font-bold text-slate-900 group-hover:text-blue-700">
-                                                {item.term}
-                                            </h3>
-                                            <p className="mt-1 text-sm text-slate-500">
-                                                {item.en} · {item.uz}
-                                            </p>
-                                        </div>
-                                        <ChevronRight className="mt-2 shrink-0 text-slate-400 group-hover:text-blue-700" size={20} />
-                                    </div>
+                        {items.length > 0 ? (
+                            <>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-sm">
+                                        <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+                                            <tr>
+                                                <th className="px-5 py-3 font-medium">Термин</th>
+                                                <th className="px-5 py-3 font-medium">Статус</th>
+                                                <th className="px-5 py-3 font-medium">Просмотры</th>
+                                                <th className="px-5 py-3 font-medium">Дата создания</th>
+                                                <th className="px-5 py-3 text-right font-medium">Действия</th>
+                                            </tr>
+                                        </thead>
 
-                                    <p className="mt-4 text-sm leading-6 text-slate-600">
-                                        {item.definition}
-                                    </p>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {items.map((term) => {
+                                                const translation = term.translations?.[0];
 
-                                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
-                                        <span className="text-xs text-slate-500">
-                                            Источник: {item.source}
-                                        </span>
-                                        <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${item.status === 'Проверено' ? 'text-emerald-700' : 'text-amber-700'}`}>
-                                            <CheckCircle2 size={14} />
-                                            {item.status}
-                                        </span>
-                                    </div>
-                                </Link>
-                            ))}
+                                                return (
+                                                    <tr
+                                                        key={term.id}
+                                                        className="transition hover:bg-gray-50"
+                                                    >
+                                                        <td className="px-5 py-4">
+                                                            <div className="font-medium text-gray-900">
+                                                                {translation?.title ?? 'Без названия'}
+                                                            </div>
+                                                            {translation?.description && (
+                                                                <p className="mt-1 max-w-md truncate text-xs text-gray-500">
+                                                                    {translation.description}
+                                                                </p>
+                                                            )}
+                                                        </td>
 
-                            {filtered.length === 0 && (
-                                <div className="rounded-2xl border border-dashed border-slate-300 bg-white py-14 text-center">
-                                    <BookOpen className="mx-auto text-slate-300" size={36} />
-                                    <p className="mt-3 font-semibold text-slate-800">
-                                        Термины не найдены
-                                    </p>
-                                    <p className="mt-1 text-sm text-slate-500">
-                                        Попробуйте изменить запрос или фильтры.
-                                    </p>
+                                                        <td className="px-5 py-4">
+                                                            <span
+                                                                className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                                                                    statusStyles[term.status] ??
+                                                                    'bg-gray-100 text-gray-700'
+                                                                }`}
+                                                            >
+                                                                {statuses[term.status] ?? term.status}
+                                                            </span>
+                                                        </td>
+
+                                                        <td className="px-5 py-4 text-gray-600">
+                                                            {term.view_count ?? 0}
+                                                        </td>
+
+                                                        <td className="px-5 py-4 whitespace-nowrap text-gray-500">
+                                                            {term.created_at
+                                                                ? new Date(term.created_at).toLocaleDateString('ru-RU')
+                                                                : '—'}
+                                                        </td>
+
+                                                        <td className="px-5 py-4">
+                                                            <div className="flex justify-end gap-2">
+                                                                <Link
+                                                                    href={`/terms/show/${term.id}`}
+                                                                    title="Просмотреть"
+                                                                    className="inline-flex items-center justify-center rounded-lg border border-blue-200 bg-blue-50 p-2 text-blue-600 shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-blue-600 hover:text-white hover:shadow-md active:scale-95"
+                                                                >
+                                                                    <Eye size={17} />
+                                                                </Link>
+                                                                <Link
+                                                                    href={`/terms/${term.id}/edit`}
+                                                                    title="Редактировать"
+                                                                    className="inline-flex items-center justify-center rounded-lg border border-amber-200 bg-amber-50 p-2 text-amber-600 shadow-sm transition-all duration-200 hover:border-amber-300 hover:bg-amber-500 hover:text-white hover:shadow-md active:scale-95"
+                                                                >
+                                                                    <Pencil size={17} />
+                                                                </Link>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
                                 </div>
-                            )}
-                        </div>
-                    </section>
+
+                                {links.length > 0 && (
+                                    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 px-5 py-4">
+                                        <p className="text-sm text-gray-500">
+                                            Показано {terms.from ?? 0}–{terms.to ?? 0} из {terms.total ?? 0}
+                                        </p>
+
+                                        <div className="flex flex-wrap gap-1">
+                                            {links.map((link, index) => {
+                                                const label = link.label
+                                                    .replace('&laquo;', '')
+                                                    .replace('&raquo;', '');
+
+                                                return (
+                                                    <button
+                                                        key={index}
+                                                        disabled={!link.url || link.active}
+                                                        onClick={() => link.url && router.visit(link.url)}
+                                                        className={`rounded-md border px-3 py-2 text-sm ${
+                                                            link.active
+                                                                ? 'border-indigo-600 bg-indigo-600 text-white'
+                                                                : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                                                        } disabled:cursor-not-allowed disabled:opacity-40`}
+                                                    >
+                                                        {label.includes('Previous') ? (
+                                                            <ChevronLeft size={16} />
+                                                        ) : label.includes('Next') ? (
+                                                            <ChevronRight size={16} />
+                                                        ) : (
+                                                            label
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="px-6 py-16 text-center">
+                                <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-gray-100 text-gray-400">
+                                    <Search size={22} />
+                                </div>
+                                <h3 className="mt-4 font-semibold text-gray-900">
+                                    Термины не найдены
+                                </h3>
+                                <p className="mt-1 text-sm text-gray-500">
+                                    Измените параметры поиска или добавьте новый термин.
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
-        </PublicLayout>
+        </>
     );
 }
