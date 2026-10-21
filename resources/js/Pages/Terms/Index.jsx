@@ -1,11 +1,11 @@
 
 import { Head, Link, router } from '@inertiajs/react';
-import { Search, Plus, Eye, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Plus, Eye, Pencil, ChevronLeft, ChevronRight,Trash } from 'lucide-react';
 import { useState } from 'react';
 import Modal from '@/Components/Modal';
 import CreateTermForm from './CreateTermForm';
 import UpdateTermForm from './UpdateTermForm';
-
+import {swalConfirm,swalSuccess,swalError } from '../../Utils/swal';
 
 const statuses = {
     draft: 'Черновик',
@@ -44,6 +44,21 @@ export default function Index({ terms, filters = {} }) {
             { preserveState: true, preserveScroll: true, replace: true },
         );
     }
+
+    const handleDelete = async (termId) => {
+        const confirmed = await swalConfirm('Удалить этот термин?', 'Запись будет удалена безвозвратно.');
+        if (confirmed) {
+            router.delete(`/terms/${termId}`, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    swalSuccess('Термин успешно удален');
+                },
+                onError: () => {
+                    swalError('Ошибка при удалении термина');
+                },
+            });
+        }
+    };
 
     const items = terms.data ?? [];
     const links = terms.links ?? [];
@@ -204,7 +219,7 @@ export default function Index({ terms, filters = {} }) {
                                                                 <Link
                                                                     href={`/terms/show/${term.id}`}
                                                                     title="Просмотреть"
-                                                                    className="inline-flex items-center justify-center rounded-lg border border-blue-200 bg-blue-50 p-2 text-blue-600 shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-blue-600 hover:text-white hover:shadow-md active:scale-95"
+                                                                    className="inline-flex items-center justify-center rounded border border-blue-200 bg-blue-50 p-2 text-blue-600 shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-blue-600 hover:text-white hover:shadow-md active:scale-95"
                                                                 >
                                                                     <Eye size={17} />
                                                                 </Link>
@@ -214,9 +229,17 @@ export default function Index({ terms, filters = {} }) {
                                                                         setIsModalOpen(true);
                                                                     }}
                                                                     title="Редактировать"
-                                                                    className="inline-flex items-center justify-center rounded-lg border border-amber-200 bg-amber-50 p-2 text-amber-600 shadow-sm transition-all duration-200 hover:border-amber-300 hover:bg-amber-500 hover:text-white hover:shadow-md active:scale-95"
+                                                                    className="inline-flex items-center justify-center rounded border border-amber-200 bg-amber-50 p-2 text-amber-600 shadow-sm transition-all duration-200 hover:border-amber-300 hover:bg-amber-500 hover:text-white hover:shadow-md active:scale-95"
                                                                 >
                                                                     <Pencil size={17} />
+                                                                </button>
+
+                                                                <button
+                                                                    onClick={()=>handleDelete(term.id)}
+                                                                    title="Редактировать"
+                                                                    className="inline-flex items-center justify-center rounded border border-red-200 bg-red-50 p-2 text-amber-600 shadow-sm transition-all duration-200 hover:border-red-300 hover:bg-red-500 hover:text-white hover:shadow-md active:scale-95"
+                                                                >
+                                                                    <Trash size={17} />
                                                                 </button>
                                                             </div>
                                                         </td>

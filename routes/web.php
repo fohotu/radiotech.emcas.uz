@@ -84,6 +84,8 @@ Route::get('/about', fn () => Inertia::render('About'))
     Route::put('/terms/{term}',[TermController::class, 'update'])
     ->name('terms.update');
     
+    Route::delete('/terms/{term}', [TermController::class, 'destroy'])
+    ->name('terms.destroy');
 
     /*
         Route::resource('terms', TermController::class)

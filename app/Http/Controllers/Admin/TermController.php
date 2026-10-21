@@ -50,12 +50,8 @@ class TermController extends Controller
         return redirect()->back()->with('success', 'Термин успешно обновлён!');
     }
 
-    public function destroy(
-        Term $term,
-        DeleteTerm $action
-    ): RedirectResponse {
+    public function destroy(Term $term,DeleteTerm $action): RedirectResponse {
         $action->execute($term);
-
         return to_route('terms.index')
             ->with('success', 'Термин удалён.');
     }
