@@ -6,6 +6,10 @@ use Inertia\Inertia;
 use App\Http\Controllers\Admin\TermController;
 
 
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+
+
 Route::get('/', function () {
     return Inertia::render('Home');
 })->name('home');
@@ -54,6 +58,19 @@ Route::get('/about', fn () => Inertia::render('About'))
 
 
 //Route::middleware('auth')->group(function () {
+   Route::get('/fake-login', function () {
+        abort_unless(app()->environment('local'), 404);
+
+        $user = User::where('email', 'test@example.com')->firstOrFail();
+
+        Auth::login($user);
+
+        request()->session()->regenerate();
+
+        return redirect('/dashboard');
+        
+    });
+
 
    Route::get('/terms', [TermController::class, 'index'])
     ->name('terms.index'); 

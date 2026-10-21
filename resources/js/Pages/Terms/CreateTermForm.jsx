@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 import { Save, X } from 'lucide-react';
-
+import { swalError,swalSuccess } from '../../Utils/swal';
 export default function CreateTermForm({ onClose }) {
-    const [activeLanguage, setActiveLanguage] = useState('uz');
 
+    const [activeLanguage, setActiveLanguage] = useState('uz');
+  
     const { data, setData, post, processing, errors, reset } = useForm({
         status: 'draft',
         translations: {
@@ -32,6 +33,7 @@ export default function CreateTermForm({ onClose }) {
         },
     });
 
+
     const languages = [
         { code: 'uz', label: "O‘zbekcha", short: 'UZ' },
         { code: 'ru', label: 'Русский', short: 'RU' },
@@ -48,16 +50,23 @@ export default function CreateTermForm({ onClose }) {
         });
     };
 
+
+
     const submit = (event) => {
         event.preventDefault();
 
         post('/terms', {
             preserveScroll: true,
-            onSuccess: () => {
+            onSuccess: (res) => {
                 reset();
                 setActiveLanguage(null);
                 onClose();
+                swalSuccess('Term created successfully created')
+              
             },
+            onError: (err) => {
+                swalError('Error creating term')
+            }
         });
     };
 
@@ -72,7 +81,6 @@ export default function CreateTermForm({ onClose }) {
                 <label className="mb-1.5 block text-sm font-medium text-gray-700">
                     {label}
                 </label>
-
                 {multiline ? (
                     <textarea
                         rows={field === 'definition' ? 4 : 2}
@@ -94,7 +102,6 @@ export default function CreateTermForm({ onClose }) {
                         className={inputClass}
                     />
                 )}
-
                 {errors[errorKey] && (
                     <p className="mt-1 text-xs text-red-600">
                         {errors[errorKey]}
@@ -110,6 +117,12 @@ export default function CreateTermForm({ onClose }) {
                 <label className="mb-2 block text-sm font-medium text-gray-700">
                     Статус термина
                 </label>
+
+                {errors.translations && (
+    <p className="text-sm text-red-600">
+        {errors.translations}
+    </p>
+)}
 
                 <select
                     value={data.status}

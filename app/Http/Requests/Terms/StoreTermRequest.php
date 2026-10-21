@@ -23,49 +23,18 @@ class StoreTermRequest extends FormRequest
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     
-
     public function rules(): array
     {
         return [
-            'status' => [
-                'required',
-                'string',
-                'in:draft,published,archived',
-            ],
+            
+            'status' => ['required', 'string', 'in:draft,published,archived'],
+            'translations' => ['required', 'array'],
+            'translations.*.title' => ['nullable', 'string', 'max:255'],
+            'translations.*.description' => ['nullable', 'string'],
+            'translations.*.definition' => ['nullable', 'string'],
+            'translations.*.pronunciation' => ['nullable', 'string', 'max:255'],
+            'translations.*.usage_note' => ['nullable', 'string'],
 
-            'translations' => [
-                'required',
-                'array',
-            ],
-
-            'translations.ru' => ['nullable', 'array'],
-            'translations.uz' => ['nullable', 'array'],
-            'translations.en' => ['nullable', 'array'],
-
-            // Название
-            'translations.ru.title' => ['nullable', 'string', 'max:255'],
-            'translations.uz.title' => ['nullable', 'string', 'max:255'],
-            'translations.en.title' => ['nullable', 'string', 'max:255'],
-
-            // Краткое описание
-            'translations.ru.description' => ['nullable', 'string'],
-            'translations.uz.description' => ['nullable', 'string'],
-            'translations.en.description' => ['nullable', 'string'],
-
-            // Определение
-            'translations.ru.definition' => ['nullable', 'string'],
-            'translations.uz.definition' => ['nullable', 'string'],
-            'translations.en.definition' => ['nullable', 'string'],
-
-            // Произношение
-            'translations.ru.pronunciation' => ['nullable', 'string', 'max:255'],
-            'translations.uz.pronunciation' => ['nullable', 'string', 'max:255'],
-            'translations.en.pronunciation' => ['nullable', 'string', 'max:255'],
-
-            // Примечание
-            'translations.ru.usage_note' => ['nullable', 'string'],
-            'translations.uz.usage_note' => ['nullable', 'string'],
-            'translations.en.usage_note' => ['nullable', 'string'],
         ];
     }
 

@@ -22,6 +22,7 @@ class TermController extends Controller
         
         $query = $request->only(['search', 'status']);
         $terms = $searchTerms->execute($query);
+      
         return Inertia::render('Terms/Index', [
             'terms' => $terms,
             'filters' => $query,
@@ -39,17 +40,8 @@ class TermController extends Controller
     }
 
     public function store(StoreTermRequest $request,CreateTerm $action): RedirectResponse {
-        
-       // dd($request);
-
-        $action->execute(
-            $request->validated(),
-            mt_rand(100000, 999999),
-           // (int) $request->user()->id
-        );
-
-        return to_route('terms.index')
-            ->with('success', 'Термин создан.');
+        $action->execute($request->validated(),(int) $request->user()->id);
+        return redirect()->back()->with('success', 'Термин успешно создан!');
     }
 
     public function update(

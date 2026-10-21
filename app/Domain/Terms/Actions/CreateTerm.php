@@ -5,6 +5,10 @@ namespace App\Domain\Terms\Actions;
 use App\Domain\Terms\Models\Term;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+
 use InvalidArgumentException;
 
 class CreateTerm
@@ -15,12 +19,6 @@ class CreateTerm
     {
         return DB::transaction(function () use ($data, $userId) {
             $translations = $data['translations'] ?? [];
-
-            if (! is_array($translations) || empty($translations)) {
-                throw new InvalidArgumentException(
-                    'At least one translation is required.'
-                );
-            }
 
             $term = Term::create([
                 'uuid' => (string) Str::uuid(),
@@ -69,11 +67,6 @@ class CreateTerm
                 }
             }
 
-            if ($term->translations()->count() === 0) {
-                throw new InvalidArgumentException(
-                    'At least one translation with a title is required.'
-                );
-            }
 
             return $term;
         });

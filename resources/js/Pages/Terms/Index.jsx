@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Modal from '@/Components/Modal';
 import CreateTermForm from './CreateTermForm';
 
+
 const statuses = {
     draft: 'Черновик',
     published: 'Опубликован',
@@ -57,6 +58,7 @@ export default function Index({ terms, filters = {} }) {
                 <CreateTermForm 
                     onClose={() => setIsModalOpen(false)}
                 />
+               
             </Modal>
             <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
                 <div className="mx-auto max-w-7xl space-y-6">
