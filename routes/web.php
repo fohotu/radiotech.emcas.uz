@@ -80,6 +80,9 @@ Route::get('/about', fn () => Inertia::render('About'))
 
     Route::post('/terms', [TermController::class, 'store'])
     ->name('terms.store');
+
+    Route::put('/terms/{term}',[TermController::class, 'update'])
+    ->name('terms.update');
     
 
     /*

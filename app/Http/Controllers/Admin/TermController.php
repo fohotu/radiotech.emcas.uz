@@ -10,7 +10,7 @@ use App\Domain\Terms\Actions\UpdateTerm;
 use App\Domain\Terms\Models\Term;
 use App\Domain\Terms\Queries\SearchTerms;
 use App\Http\Requests\Terms\StoreTermRequest;
-use App\Http\Requests\UpdateTermRequest;
+use App\Http\Requests\Terms\UpdateTermRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -44,19 +44,10 @@ class TermController extends Controller
         return redirect()->back()->with('success', 'Термин успешно создан!');
     }
 
-    public function update(
-        UpdateTermRequest $request,
-        Term $term,
-        UpdateTerm $action
-    ): RedirectResponse {
-        $action->execute(
-            $term,
-            $request->validated(),
-            (int) $request->user()->id
-        );
-
-        return to_route('terms.index')
-            ->with('success', 'Термин обновлён.');
+    public function update(UpdateTermRequest $request,Term $term,UpdateTerm $action): RedirectResponse 
+    {
+        $action->execute($term,$request->validated(),(int) $request->user()->id);
+        return redirect()->back()->with('success', 'Термин успешно обновлён!');
     }
 
     public function destroy(

@@ -4,6 +4,7 @@ import { Search, Plus, Eye, Pencil, ChevronLeft, ChevronRight } from 'lucide-rea
 import { useState } from 'react';
 import Modal from '@/Components/Modal';
 import CreateTermForm from './CreateTermForm';
+import UpdateTermForm from './UpdateTermForm';
 
 
 const statuses = {
@@ -21,7 +22,8 @@ const statusStyles = {
 export default function Index({ terms, filters = {} }) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
-     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [activeTerm,setActiveTerm] = useState(null);
 
     function submitSearch(e) {
         e.preventDefault();
@@ -55,9 +57,20 @@ export default function Index({ terms, filters = {} }) {
                 onClose={() => setIsModalOpen(false)}
                 title="Добавить термин"
             >
-                <CreateTermForm 
-                    onClose={() => setIsModalOpen(false)}
-                />
+                {
+                    activeTerm ?
+                        <UpdateTermForm
+                            term={activeTerm}
+                            onClose={() => {
+                                setActiveTerm(null);
+                                setIsModalOpen(false)
+                            }}
+                        />  
+                    :
+                    <CreateTermForm 
+                        onClose={() => setIsModalOpen(false)}
+                    />
+                }
                
             </Modal>
             <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
@@ -195,13 +208,16 @@ export default function Index({ terms, filters = {} }) {
                                                                 >
                                                                     <Eye size={17} />
                                                                 </Link>
-                                                                <Link
-                                                                    href={`/terms/${term.id}/edit`}
+                                                                <button
+                                                                    onClick={()=>{
+                                                                        setActiveTerm(term);
+                                                                        setIsModalOpen(true);
+                                                                    }}
                                                                     title="Редактировать"
                                                                     className="inline-flex items-center justify-center rounded-lg border border-amber-200 bg-amber-50 p-2 text-amber-600 shadow-sm transition-all duration-200 hover:border-amber-300 hover:bg-amber-500 hover:text-white hover:shadow-md active:scale-95"
                                                                 >
                                                                     <Pencil size={17} />
-                                                                </Link>
+                                                                </button>
                                                             </div>
                                                         </td>
                                                     </tr>

@@ -46,6 +46,7 @@ class CreateTerm
                 $term->translations()->create([
                     'language_code' => $language,
                     'title' => $title,
+                    'term_id' => $term->id,
                     'description' => $translation['description'] ?? null,
                     'pronunciation' => $translation['pronunciation'] ?? null,
                     'usage_note' => $translation['usage_note'] ?? null,

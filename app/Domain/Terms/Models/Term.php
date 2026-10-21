@@ -29,12 +29,12 @@ class Term extends Model
 
     public function translations(): HasMany
     {
-        return $this->hasMany(TermTranslation::class);
+        return $this->hasMany(TermTranslation::class,'term_id');
     }
 
     public function definitions(): HasMany
     {
-        return $this->hasMany(TermDefinition::class);
+        return $this->hasMany(TermDefinition::class,'term_id');
     }
 
     public function aliases(): HasMany
