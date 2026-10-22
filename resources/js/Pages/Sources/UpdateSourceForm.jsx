@@ -9,6 +9,7 @@ const sourceTypes = [
 ];
 
 export default function UpdateSourceForm({ source }) {
+    
     const { data, setData, put, processing, errors } = useForm({
         title: source.title ?? '',
         source_type: source.source_type ?? 'standard',
@@ -21,8 +22,8 @@ export default function UpdateSourceForm({ source }) {
 
     const submit = (event) => {
         event.preventDefault();
-
-        put(route('admin.sources.update', source.id), {
+        
+        put((`source/${source.id}`), {
             preserveScroll: true,
         });
     };
@@ -47,7 +48,7 @@ export default function UpdateSourceForm({ source }) {
                     {/* Header */}
                     <div className="mb-6">
                         <Link
-                            href={route('admin.sources.index')}
+                            href={'/source'}
                             className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-blue-600"
                         >
                             <span aria-hidden="true">←</span>
@@ -271,7 +272,7 @@ export default function UpdateSourceForm({ source }) {
                         {/* Actions */}
                         <div className="flex flex-col-reverse gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:justify-end">
                             <Link
-                                href={route('admin.sources.index')}
+                                href={'/source'}
                                 className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
                             >
                                 Cancel

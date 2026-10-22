@@ -109,6 +109,9 @@ Route::get('/about', fn () => Inertia::render('About'))
     
      Route::post('/source', [SourceController::class, 'store'])
     ->name('source.store');
+
+    Route::put('/source/{source}',[SourceController::class, 'update'])
+    ->name('source.update');
 //});
 
 

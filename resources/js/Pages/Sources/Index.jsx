@@ -241,6 +241,17 @@ export default function Index({ sources, filters = {} }) {
                                                     >
                                                         Edit
                                                     </Link>
+                                                    <button
+                                                        onClick={()=>{
+                                                            setActiveSource(source);
+                                                            setIsModalOpen(true);
+                                                        }}
+                                                        title="Редактировать"
+                                                        className="inline-flex items-center justify-center rounded border border-amber-200 bg-amber-50 p-2 text-amber-600 shadow-sm transition-all duration-200 hover:border-amber-300 hover:bg-amber-500 hover:text-white hover:shadow-md active:scale-95"
+                                                    >
+                                                        <Pencil size={17} />
+                                                    </button>
+
                                                 </td>
                                             </tr>
                                         ))
