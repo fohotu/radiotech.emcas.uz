@@ -1,5 +1,6 @@
 
 import { Head, Link, useForm } from '@inertiajs/react';
+import {swalSuccess,swalError } from '../../Utils/swal';
 
 const sourceTypes = [
     { value: 'standard', label: 'Standard' },
@@ -9,7 +10,7 @@ const sourceTypes = [
     { value: 'other', label: 'Other' },
 ];
 
-export default function CreateSourceForm() {
+export default function CreateSourceForm({onClose}) {
     const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
         source_type: 'standard',
@@ -25,7 +26,14 @@ export default function CreateSourceForm() {
 
         post('source', {
             preserveScroll: true,
-            onSuccess: () => reset(),
+              onSuccess: () => {
+                    reset();
+                    onClose();
+                    swalSuccess('Source Created successfully');
+                },
+                onError: () => {
+                    swalError('Error Create Source');
+                },
         });
     };
 

@@ -1,4 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import {swalSuccess,swalError } from '../../Utils/swal';
 
 const sourceTypes = [
     { value: 'standard', label: 'Standard' },
@@ -8,9 +9,9 @@ const sourceTypes = [
     { value: 'other', label: 'Other' },
 ];
 
-export default function UpdateSourceForm({ source }) {
+export default function UpdateSourceForm({ source,onClose }) {
     
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, put, processing, errors,reset } = useForm({
         title: source.title ?? '',
         source_type: source.source_type ?? 'standard',
         identifier: source.identifier ?? '',
@@ -25,6 +26,14 @@ export default function UpdateSourceForm({ source }) {
         
         put((`source/${source.id}`), {
             preserveScroll: true,
+             onSuccess: () => {
+                reset();
+                onClose();
+                swalSuccess('Term updated successfully');
+            },
+            onError: () => {
+                swalError('Error updating term');
+            },
         });
     };
 

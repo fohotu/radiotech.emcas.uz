@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Modal from '@/Components/Modal';
 import CreateSourceForm from './CreateSourceForm';
 import UpdateSourceForm from './UpdateSourceForm';
+import {swalConfirm,swalSuccess,swalError } from '../../Utils/swal';
 
 import { Search, Plus, Eye, Pencil, ChevronLeft, ChevronRight,Trash } from 'lucide-react';
 
@@ -23,6 +24,24 @@ export default function Index({ sources, filters = {} }) {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeSource,setActiveSource] = useState(null);
+
+
+    
+
+     const handleDelete = async (sourceId) => {
+            const confirmed = await swalConfirm('Удалить этот источник?', 'Запись будет удалена безвозвратно.');
+            if (confirmed) {
+                router.delete(`/source/${sourceId}`, {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        swalSuccess('Термин успешно удален');
+                    },
+                    onError: () => {
+                        swalError('Ошибка при удалении термина');
+                    },
+                });
+            }
+        };
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -235,12 +254,6 @@ export default function Index({ sources, filters = {} }) {
                                                 </td>
 
                                                 <td className="px-5 py-4 text-right">
-                                                    <Link
-                                                        href={'edit/'}
-                                                        className="font-medium text-blue-600 hover:text-blue-800"
-                                                    >
-                                                        Edit
-                                                    </Link>
                                                     <button
                                                         onClick={()=>{
                                                             setActiveSource(source);
@@ -250,6 +263,14 @@ export default function Index({ sources, filters = {} }) {
                                                         className="inline-flex items-center justify-center rounded border border-amber-200 bg-amber-50 p-2 text-amber-600 shadow-sm transition-all duration-200 hover:border-amber-300 hover:bg-amber-500 hover:text-white hover:shadow-md active:scale-95"
                                                     >
                                                         <Pencil size={17} />
+                                                    </button>
+
+                                                     <button
+                                                        onClick={()=>handleDelete(source.id)}
+                                                        title="Удалить"
+                                                        className="inline-flex items-center justify-center rounded border border-red-200 bg-red-50 p-2 text-amber-600 shadow-sm transition-all duration-200 hover:border-red-300 hover:bg-red-500 hover:text-white hover:shadow-md active:scale-95"
+                                                    >
+                                                        <Trash size={17} />
                                                     </button>
 
                                                 </td>

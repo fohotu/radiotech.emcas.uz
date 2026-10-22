@@ -14,6 +14,7 @@ use App\Domain\Sources\Queries\SearchSources;
 use App\Domain\Sources\Actions\UpdateSource;
 use App\Domain\Sources\Models\Source;
 use App\Http\Requests\Source\UpdateSourceRequest;
+use App\Domain\Sources\Actions\DeleteSource;
 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -49,16 +50,18 @@ class SourceController extends Controller
         return redirect()->back()->with('success', 'Источник успешно создан!');
     }
 
-
-    public function update1(UpdateSourceRequest $request,Source $term,UpdateSource $action): RedirectResponse 
-    {
-        $action->execute($term,$request->validated(),(int) $request->user()->id);
-        return redirect()->back()->with('success', 'Термин успешно обновлён!');
-    }
-
     public function update(UpdateSourceRequest $request,Source $source,UpdateSource $action): RedirectResponse {
         $action->execute($source, $request->validated());
         return redirect()->back()->with('success', 'Термин успешно обновлён!');
     }
+
+
+    public function destroy(Source $source,DeleteSource $action): RedirectResponse {
+        $action->execute($source);
+        return redirect()->back()->with('success', 'Source deleted successfully!');
+    }
+
+
+   
 
 }

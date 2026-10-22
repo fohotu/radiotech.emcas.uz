@@ -112,6 +112,10 @@ Route::get('/about', fn () => Inertia::render('About'))
 
     Route::put('/source/{source}',[SourceController::class, 'update'])
     ->name('source.update');
+
+
+    Route::delete('/source/{source}', [SourceController::class, 'destroy'])
+    ->name('source.destroy');
 //});
 
 
