@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 use App\Http\Controllers\Admin\TermController;
+use App\Http\Controllers\Admin\SourceController;
 
 
 use App\Models\User;
@@ -100,6 +101,14 @@ Route::get('/about', fn () => Inertia::render('About'))
         ->name('terms.restore');
 
 
+
+
+    //Source
+    Route::get('/source', [SourceController::class, 'index'])
+    ->name('source.index');   
+    
+     Route::post('/source', [SourceController::class, 'store'])
+    ->name('source.store');
 //});
 
 

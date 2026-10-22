@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Domain\Terms\Queries;
 
 use App\Domain\Terms\Models\Term;
