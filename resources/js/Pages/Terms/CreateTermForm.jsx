@@ -34,6 +34,8 @@ export default function CreateTermForm({ onClose }) {
     });
 
 
+
+
     const languages = [
         { code: 'uz', label: "O‘zbekcha", short: 'UZ' },
         { code: 'ru', label: 'Русский', short: 'RU' },

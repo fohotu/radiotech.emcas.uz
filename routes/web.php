@@ -5,7 +5,7 @@ use Inertia\Inertia;
 
 use App\Http\Controllers\Admin\TermController;
 use App\Http\Controllers\Admin\SourceController;
-
+use App\Http\Controllers\Admin\TechnologyController;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -113,9 +113,27 @@ Route::get('/about', fn () => Inertia::render('About'))
     Route::put('/source/{source}',[SourceController::class, 'update'])
     ->name('source.update');
 
-
     Route::delete('/source/{source}', [SourceController::class, 'destroy'])
     ->name('source.destroy');
+
+    //Technologie
+    Route::get('/technologies', [TechnologyController::class, 'index'])
+    ->name('technologies.index');
+
+
+
+    Route::post('/technologies', [TechnologyController::class, 'store'])
+    ->name('technologies.store');
+
+
+    Route::put('/technologies/{technology}', [TechnologyController::class, 'update'])
+    ->name('technologies.update');
+
+
+    Route::delete('/technologies/{technology}', [TechnologyController::class, 'destroy'])
+    ->name('technologies.destroy');
+
+
 //});
 
 
