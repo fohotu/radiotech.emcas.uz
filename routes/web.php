@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\Admin\TermController;
 use App\Http\Controllers\Admin\SourceController;
 use App\Http\Controllers\Admin\TechnologyController;
+use App\Http\Controllers\Admin\TechnologyCategoryController;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -132,6 +133,19 @@ Route::get('/about', fn () => Inertia::render('About'))
 
     Route::delete('/technologies/{technology}', [TechnologyController::class, 'destroy'])
     ->name('technologies.destroy');
+
+
+    Route::get('/technology-categories',[TechnologyCategoryController::class, 'index'])
+     ->name('technology-categories.index');
+
+    Route::post('/technology-categories',[TechnologyCategoryController::class, 'store'])
+    ->name('technology-categories.store');
+
+    Route::put('/technology-categories/{technologyCategory}',[TechnologyCategoryController::class, 'update'])
+    ->name('technology-categories.update');
+
+    Route::delete('/technology-categories/{technologyCategory}',[TechnologyCategoryController::class, 'destroy'])
+    ->name('technology-categories.destroy');
 
 
 //});
