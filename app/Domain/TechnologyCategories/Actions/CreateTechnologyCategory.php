@@ -11,8 +11,9 @@ class CreateTechnologyCategory
         return DB::transaction(function () use ($data) {
             $translations = $data['translations'] ?? [];
 
+            
             unset($data['translations']);
-
+          //  dd($data);
             $category = TechnologyCategory::create($data);
 
             foreach ($translations as $locale => $translation) {

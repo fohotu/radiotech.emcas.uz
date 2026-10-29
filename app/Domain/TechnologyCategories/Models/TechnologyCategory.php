@@ -11,6 +11,7 @@ class TechnologyCategory extends Model
 {
     protected $fillable = [
         'parent_id',
+        'name',
         'slug',
         'sort_order',
         'is_active',
