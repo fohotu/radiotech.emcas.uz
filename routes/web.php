@@ -7,8 +7,10 @@ use App\Http\Controllers\Admin\TermController;
 use App\Http\Controllers\Admin\SourceController;
 use App\Http\Controllers\Admin\TechnologyController;
 use App\Http\Controllers\Admin\TechnologyCategoryController;
+use App\Http\Controllers\Admin\UserController;
 
-use App\Models\User;
+//use App\Models\User;
+use App\Domain\Users\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -146,6 +148,15 @@ Route::get('/about', fn () => Inertia::render('About'))
 
     Route::delete('/technology-categories/{technologyCategory}',[TechnologyCategoryController::class, 'destroy'])
     ->name('technology-categories.destroy');
+
+
+
+
+
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
 
 //});
