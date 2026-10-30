@@ -36,8 +36,8 @@ export default function Index({ users, filters = {} }) {
     };
 
     const resetSearch = () => {
-        setSearch('');
 
+        setSearch('');
         router.get(
             '/users',
             {},
@@ -47,6 +47,7 @@ export default function Index({ users, filters = {} }) {
                 replace: true,
             }
         );
+        
     };
 
     const openUpdateModal = (user) => {
@@ -70,6 +71,7 @@ export default function Index({ users, filters = {} }) {
     };
 
     const getRoleBadge = (role) => {
+        
         const styles = {
             admin: 'bg-purple-100 text-purple-700',
             editor: 'bg-blue-100 text-blue-700',
@@ -77,6 +79,7 @@ export default function Index({ users, filters = {} }) {
         };
 
         return styles[role] || 'bg-gray-100 text-gray-700';
+    
     };
 
     return (

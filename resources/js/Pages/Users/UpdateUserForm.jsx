@@ -1,5 +1,6 @@
 import { useForm } from '@inertiajs/react';
 import { Save, X } from 'lucide-react';
+import {swalSuccess,swalError } from '../../Utils/swal';
 
 export default function UpdateUserForm({ user, onClose }) {
     
@@ -17,8 +18,13 @@ export default function UpdateUserForm({ user, onClose }) {
             preserveScroll: true,
             onSuccess: () => {
                 onClose();
+                swalSuccess('Source Created successfully');
+            },
+            onError: () => {
+                swalError('Error Create Source');
             },
         });
+
     };
 
     return (
