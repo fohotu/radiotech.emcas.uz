@@ -61,5 +61,29 @@ class TechnologyController extends Controller
     }
 
 
+    public function edit(Technology $technology)
+    {
+        return inertia('Technologies/EditTechnology', [
+            'technology' => [
+                ...$technology->toArray(),
+
+                'media' => $technology
+                    ->getMedia('images')
+                    ->map(fn ($media) => [
+                        'id' => $media->id,
+                        'name' => $media->name,
+                        'file_name' => $media->file_name,
+                        'mime_type' => $media->mime_type,
+                        'size' => $media->size,
+                        'url' => $media->getUrl(),
+                        'thumbnail' => $media->hasGeneratedConversion('thumb')
+                            ? $media->getUrl('thumb')
+                            : $media->getUrl(),
+                    ])
+                    ->values(),
+            ],
+        ]);
+    }
+
     
 }

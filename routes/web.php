@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\SourceController;
 use App\Http\Controllers\Admin\TechnologyController;
 use App\Http\Controllers\Admin\TechnologyCategoryController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\MediaController;
 
 //use App\Models\User;
 use App\Domain\Users\Models\User;
@@ -151,12 +152,22 @@ Route::get('/about', fn () => Inertia::render('About'))
 
 
 
-
-
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
+
+    //MediaUploader
+
+    Route::post('/media/{modelType}/{modelId}',[MediaController::class, 'store'])->name('admin.media.store');
+    Route::delete('/media/{media}',[MediaController::class, 'destroy'])->name('admin.media.destroy');
+    Route::get('/media',[MediaController::class, 'index']);
+    Route::post('/media', [MediaController::class, 'store'])->name('media.store');
+    Route::delete('/media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
+    Route::get('/technologies/{technology}/edit',[TechnologyController::class, 'edit'])->name('admin.technologies.edit');
+    
+
 
 
 //});

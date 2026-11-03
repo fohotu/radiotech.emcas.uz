@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { X } from 'lucide-react';
 
@@ -7,6 +8,7 @@ export default function Modal({
     title,
     children,
     maxWidth = 'max-w-lg',
+    maxHeight = 'max-h-[90vh]',
 }) {
     useEffect(() => {
         if (!show) return;
@@ -30,7 +32,7 @@ export default function Modal({
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-3 sm:p-4 backdrop-blur-sm"
             onMouseDown={(event) => {
                 if (event.target === event.currentTarget) {
                     onClose();
@@ -41,9 +43,9 @@ export default function Modal({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="modal-title"
-                className={`w-full ${maxWidth} overflow-hidden rounded-2xl bg-white shadow-2xl`}
+                className={`flex w-full ${maxWidth} ${maxHeight} flex-col overflow-hidden rounded-2xl bg-white shadow-2xl`}
             >
-                <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+                <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-4">
                     <h2
                         id="modal-title"
                         className="text-lg font-semibold text-gray-900"
@@ -61,7 +63,7 @@ export default function Modal({
                     </button>
                 </div>
 
-                <div className="p-6">
+                <div className="min-h-0 flex-1 overflow-y-auto p-6">
                     {children}
                 </div>
             </div>

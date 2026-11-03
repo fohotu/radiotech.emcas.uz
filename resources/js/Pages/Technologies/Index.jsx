@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import CreateTechnologyForm from './CreateTechnologyForm';
 import UpdateTechnologyForm from './UpdateTechnologyForm';
 import Modal from '@/Components/Modal';
+import Media from '../Media/Index';
 import { Search, Plus, Eye, Pencil, ChevronLeft, ChevronRight,Trash } from 'lucide-react';
 
 
@@ -78,6 +79,7 @@ export default function Index({ technologies, categories, filters }) {
     return (
         <>
             <Head title="Технологии радиосвязи" />
+
 
              <Modal
                             show={isModalOpen}
