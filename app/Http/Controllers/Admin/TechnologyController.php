@@ -5,6 +5,7 @@ use App\Domain\Technologies\Queries\SearchTechnologies;
 use App\Domain\Technologies\Models\Technology;
 use App\Http\Controllers\Controller;
 use App\Domain\TechnologyCategories\Models\TechnologyCategory;
+use App\Domain\Media\Queries\MediaQuery;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -13,13 +14,16 @@ use Inertia\Response;
 use App\Domain\Technologies\Actions\CreateTechnology;
 use App\Domain\Technologies\Actions\UpdateTechnology;
 use App\Domain\Technologies\Actions\DeleteTechnology;
+use App\Domain\Technologies\Actions\AttachMediaToTechnology;
 use App\Http\Requests\Technology\StoreTechnologyRequest;
 use App\Http\Requests\Technology\UpdateTechnologyRequest;
+use App\Http\Requests\Technology\AttachMediaRequest;
 use Illuminate\Http\RedirectResponse;
 
 class TechnologyController extends Controller
 {
-    public function index(Request $request,SearchTechnologies $query): Response {
+    public function index(Request $request,SearchTechnologies $query,MediaQuery $mediaQuery): Response {
+        
         
         $filters = $request->only([
             'search',
@@ -28,12 +32,35 @@ class TechnologyController extends Controller
             'per_page',
         ]);
 
+        $c = Technology::class;
+       //dd($c);
+        
+        $media = $mediaQuery->get([
+            //'model_type' => Technology::class,
+        ]);
+
+        $media = $media->map(fn ($media) => [
+            'id' => $media->id,
+            'name' => $media->name,
+            'file_name' => $media->file_name,
+            'mime_type' => $media->mime_type,
+            'size' => $media->size,
+            'url' => $media->getUrl(),
+            'thumbnail' => $media->hasGeneratedConversion('thumb')
+                ? $media->getUrl('thumb')
+                : $media->getUrl(),
+        ])->values();
+
+        
+
         return Inertia::render('Technologies/Index', [
             'technologies' => $query->execute($filters),
             'categories' => TechnologyCategory::query()
                 ->orderBy('name')
                 ->get(['id', 'name']),
             'filters' => $filters,
+            'media' => $media,
+           
         ]);
 
     }
@@ -66,7 +93,6 @@ class TechnologyController extends Controller
         return inertia('Technologies/EditTechnology', [
             'technology' => [
                 ...$technology->toArray(),
-
                 'media' => $technology
                     ->getMedia('images')
                     ->map(fn ($media) => [
@@ -83,6 +109,13 @@ class TechnologyController extends Controller
                     ->values(),
             ],
         ]);
+    }
+
+    
+    public function attachMedia(AttachMediaRequest $request,Technology $technology,AttachMediaToTechnology $action) {    
+       //dd($technology,$request->validated('media_id'));
+        $action->execute($technology,$request->validated('media_id'));
+        return back()->with('success', 'Image attached successfully.');
     }
 
     

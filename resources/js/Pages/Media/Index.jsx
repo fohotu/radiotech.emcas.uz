@@ -30,7 +30,7 @@ export default function Index({media: initialMedia }) {
                 maxWidth="max-w-6xl"
                 maxHeight="max-h-[90vh]"
             >
-                 <MediaUploader
+                <MediaUploader
                     endpoint={`/media`}
                     collection="images"
                     maxFiles={10}
@@ -46,7 +46,6 @@ export default function Index({media: initialMedia }) {
                     Total images: {media.length}
                 </p>
             </Modal>
-
             <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}

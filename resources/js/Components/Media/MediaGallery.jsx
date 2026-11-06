@@ -17,6 +17,8 @@ export default function MediaGallery({
     deleteUrl,
     onDeleted,
     onError,
+    onSelect,
+    selectedId = null,
     columns = 4,
 }) {
     const [items, setItems] = useState(media);
@@ -124,9 +126,14 @@ export default function MediaGallery({
 
                         return (
                             <div
-                                key={item.id}
-                                className="group overflow-hidden rounded border border-gray-200 bg-white max-w-48 mx-auto"
-                            >
+                                    key={item.id}
+                                    className={`group overflow-hidden rounded border bg-white max-w-48 mx-auto transition
+                                        ${
+                                            selectedId === item.id
+                                                ? 'border-blue-500 ring-2 ring-blue-500'
+                                                : 'border-gray-200'
+                                        }`}
+                                >
                                 <div className="relative flex aspect-[4/3] max-h-36 items-center justify-center overflow-hidden bg-gray-100">
                                     {isImage ? (
                                         <img
@@ -189,6 +196,20 @@ export default function MediaGallery({
 
                                     <p className="mt-1 text-xs text-gray-500">
                                         {formatSize(item.size)}
+                                    </p>
+                                    <p  className="mt-1 text-xs text-gray-500">
+                                       <button
+                                            type="button"
+                                            onClick={() => onSelect?.(item)}
+                                            className={`rounded p-2 w-full transition
+                                                ${
+                                                    selectedId === item.id
+                                                        ? 'bg-green-600 text-white hover:bg-green-700'
+                                                        : 'bg-blue-500 text-white hover:bg-blue-600'
+                                                }`}
+                                        >
+                                            {selectedId === item.id ? 'Selected' : 'Select'}
+                                        </button>
                                     </p>
                                 </div>
                             </div>

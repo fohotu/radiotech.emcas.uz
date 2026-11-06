@@ -8,27 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Image\Enums\Fit;
-
-/*
-
-Laravel Media Library
-Хранение, связи с моделями, конвертация
-
-Uppy
-React интерфейс загрузки файлов
-
-*/
-
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
-
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Technology extends Model implements HasMedia
 {
-     use InteractsWithMedia;
-    
+    use InteractsWithMedia;
+
     protected $fillable = [
         'category_id',
         'name',
@@ -58,11 +46,10 @@ class Technology extends Model implements HasMedia
         return $this->hasMany(TechnologyTranslation::class, 'technology_id');
     }
 
-
-
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('images')
+        $this->addMediaCollection('image')
+            ->singleFile()
             ->acceptsMimeTypes([
                 'image/jpeg',
                 'image/png',
@@ -85,5 +72,16 @@ class Technology extends Model implements HasMedia
         $this->addMediaConversion('preview')
             ->fit(Fit::Max, 1200, 1200)
             ->format('webp');
+    }
+
+
+    public function libraryMedia(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Media::class,
+            'technology_media',
+            'technology_id',
+            'media_id'
+        )->withTimestamps();
     }
 }

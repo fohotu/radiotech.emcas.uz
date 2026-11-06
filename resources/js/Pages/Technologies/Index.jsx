@@ -5,16 +5,24 @@ import { useEffect, useState } from 'react';
 import CreateTechnologyForm from './CreateTechnologyForm';
 import UpdateTechnologyForm from './UpdateTechnologyForm';
 import Modal from '@/Components/Modal';
-import Media from '../Media/Index';
+import MediaUploader from '@/Components/Media/MediaUploader';
+import MediaGallery from '@/Components/Media/MediaGallery';
+
 import { Search, Plus, Eye, Pencil, ChevronLeft, ChevronRight,Trash } from 'lucide-react';
+import MediaManager from '../../Components/Media/MediaManager';
 
 
-export default function Index({ technologies, categories, filters }) {
+export default function Index({ technologies, categories, filters,media,selected_media_id }) {
+    
     const [search, setSearch] = useState(filters.search ?? '');
     const [categoryId, setCategoryId] = useState(filters.category_id ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
+    
+    console.log('Selected media ID:', technologies,selected_media_id);
+
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [mediaModalOpen, setMediaModalOpen] = useState(false);
     const [activeTechnology,setActiveTechnology] = useState(null);
 
     useEffect(() => {
@@ -76,10 +84,41 @@ export default function Index({ technologies, categories, filters }) {
         });
     };
 
+    const attachMediaToTechnology = (technology, mediaId) => {
+        console.log(`Attaching media ID ${mediaId} to technology ID ${technology}`);
+
+      
+        router.post(`/technologies/${technology}/attach-media`, {
+            media_id: mediaId,
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setMediaModalOpen(false);
+                setActiveTechnology(null);
+            },
+        });
+        
+    }
+
     return (
         <>
             <Head title="Технологии радиосвязи" />
-
+            <Modal 
+                show={mediaModalOpen}
+                onClose={() => setMediaModalOpen(false)}
+                maxWidth="max-w-6xl"
+                maxHeight="max-h-[90vh]"
+            >
+                <MediaManager 
+                    media={media}
+                    selectedMediaId={activeTechnology?.selected_media_id ?? null}
+                    callBack={(selectedMedia) => {
+                        if (activeTechnology && selectedMedia) {
+                            attachMediaToTechnology(activeTechnology.id, selectedMedia.id);
+                        }
+                    }}
+                />
+            </Modal>
 
              <Modal
                             show={isModalOpen}
@@ -285,6 +324,17 @@ export default function Index({ technologies, categories, filters }) {
 
                                             <td className="px-5 py-4">
                                                 <div className="flex items-center justify-end gap-3">
+                                                    <button
+                                                        className="inline-flex items-center justify-center rounded border border-amber-200 bg-amber-50 p-2 text-amber-600 shadow-sm transition-all duration-200 hover:border-amber-300 hover:bg-amber-500 hover:text-white hover:shadow-md active:scale-95"
+                                                        onClick={() => {
+                                                                setMediaModalOpen(true)
+                                                                setActiveTechnology(technology);
+                                                            }
+                                                        }
+
+                                                    >
+                                                        Thuumb       
+                                                    </button>
                                                     <button
                                                         onClick={() => 
                                                             {

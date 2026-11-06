@@ -151,6 +151,10 @@ Route::get('/about', fn () => Inertia::render('About'))
     ->name('technology-categories.destroy');
 
 
+    Route::post('/technologies/{technology}/attach-media',[TechnologyController::class, 'attachMedia'])->name('technologies.attach-media');
+   //technologies/1/attach-media
+
+
 
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
@@ -167,8 +171,14 @@ Route::get('/about', fn () => Inertia::render('About'))
     Route::delete('/media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
     Route::get('/technologies/{technology}/edit',[TechnologyController::class, 'edit'])->name('admin.technologies.edit');
     
-
-
+    /*
+    Route::get('/media-make',function(){
+       App\Domain\Media\Models\MediaLibrary::firstOrCreate(
+            ['id' => 1],
+            ['name' => 'Global Media Library']
+        );
+    });
+    */
 
 //});
 
