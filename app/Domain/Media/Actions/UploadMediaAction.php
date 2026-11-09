@@ -33,6 +33,7 @@ class UploadMediaAction
             }
 
             return $model->getMedia($collection)->last();
+            
         });
     }
 }

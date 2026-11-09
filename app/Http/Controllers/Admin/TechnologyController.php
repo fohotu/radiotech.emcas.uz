@@ -114,6 +114,7 @@ class TechnologyController extends Controller
     
     public function attachMedia(AttachMediaRequest $request,Technology $technology,AttachMediaToTechnology $action) {    
        //dd($technology,$request->validated('media_id'));
+
         $action->execute($technology,$request->validated('media_id'));
         return back()->with('success', 'Image attached successfully.');
     }

@@ -10,6 +10,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media as SpatieMedia;
 
 class MediaLibrary extends Model implements HasMedia
 {
+
     use InteractsWithMedia;
 
     protected $fillable = ['name'];
