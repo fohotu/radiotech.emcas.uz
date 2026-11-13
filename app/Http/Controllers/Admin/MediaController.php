@@ -17,15 +17,15 @@ class MediaController extends Controller
 {
     
     public function store(UploadMediaRequest $request,UploadMediaAction $action) {
+        
         $library = MediaLibrary::firstOrCreate(['id' => 1]);
-
         $media = $action->execute(
             model: $library,
             file: $request->file('file'),
             collection: $request->collection(),
             properties: $request->properties(),
         );
-
+        
         return response()->json([
             'media' => [
                 'id' => $media->id,
@@ -38,6 +38,8 @@ class MediaController extends Controller
                 'thumbnail' => $media->getUrl('thumb'),
             ],
         ], 201);
+        
+
     }
 
     public function store2(UploadMediaRequest $request,UploadMediaAction $action) {

@@ -2,28 +2,43 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
+import {
+    Search,
+    Plus,
+    Pencil,
+    Trash2,
+    ChevronLeft,
+    ChevronRight,
+    Image,
+    Cpu,
+    Layers,
+    X,
+} from 'lucide-react';
+
 import CreateTechnologyForm from './CreateTechnologyForm';
 import UpdateTechnologyForm from './UpdateTechnologyForm';
+
 import Modal from '@/Components/Modal';
-import MediaUploader from '@/Components/Media/MediaUploader';
-import MediaGallery from '@/Components/Media/MediaGallery';
+import MediaManager from '@/Components/Media/MediaManager';
+import AdminLayout from '@/Layouts/AdminLayout';
 
-import { Search, Plus, Eye, Pencil, ChevronLeft, ChevronRight,Trash } from 'lucide-react';
-import MediaManager from '../../Components/Media/MediaManager';
-
-
-export default function Index({ technologies, categories, filters,media,selected_media_id }) {
-    
+export default function Index({
+    technologies,
+    categories = [],
+    filters = {},
+    media,
+    selected_media_id,
+}) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [categoryId, setCategoryId] = useState(filters.category_id ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
-    
-    console.log('Selected media ID:', technologies,selected_media_id);
-
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [mediaModalOpen, setMediaModalOpen] = useState(false);
-    const [activeTechnology,setActiveTechnology] = useState(null);
+    const [activeTechnology, setActiveTechnology] = useState(null);
+
+    const items = technologies?.data ?? [];
+    const links = technologies?.links ?? [];
 
     useEffect(() => {
         setSearch(filters.search ?? '');
@@ -31,11 +46,12 @@ export default function Index({ technologies, categories, filters,media,selected
         setStatus(filters.status ?? '');
     }, [filters]);
 
+    // Search and filters
     const applyFilters = (e) => {
         e.preventDefault();
 
         router.get(
-            'technologies',
+            '/technologies',
             {
                 search: search || undefined,
                 category_id: categoryId || undefined,
@@ -50,32 +66,56 @@ export default function Index({ technologies, categories, filters,media,selected
         );
     };
 
+    // Reset filters
     const resetFilters = () => {
-        
         setSearch('');
         setCategoryId('');
         setStatus('');
 
-        router.get('technologies', {}, {
-            preserveState: true,
-            preserveScroll: true,
-            replace: true,
-        });
-
-
+        router.get(
+            '/technologies',
+            {},
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        );
     };
 
-    const paginationLabel = (label) => {
-        if (label.includes('Previous')) return '← Назад';
-        if (label.includes('Next')) return 'Вперёд →';
-
-        return label.replace(/&laquo;|&raquo;/g, '');
+    // Create technology
+    const openCreateModal = () => {
+        setActiveTechnology(null);
+        setIsModalOpen(true);
     };
 
+    // Edit technology
+    const openEditModal = (technology) => {
+        setActiveTechnology(technology);
+        setIsModalOpen(true);
+    };
 
+    // Close technology modal
+    const closeTechnologyModal = () => {
+        setActiveTechnology(null);
+        setIsModalOpen(false);
+    };
 
+    // Open media manager
+    const openMediaModal = (technology) => {
+        setActiveTechnology(technology);
+        setMediaModalOpen(true);
+    };
+
+    // Close media manager
+    const closeMediaModal = () => {
+        setActiveTechnology(null);
+        setMediaModalOpen(false);
+    };
+
+    // Delete technology
     const deleteTechnology = (technology) => {
-        if (!confirm(`Delete technology "${technology.name}"?`)) {
+        if (!confirm(`Удалить технологию "${technology.name}"?`)) {
             return;
         }
 
@@ -84,345 +124,511 @@ export default function Index({ technologies, categories, filters,media,selected
         });
     };
 
-    const attachMediaToTechnology = (technology, mediaId) => {
-        console.log(`Attaching media ID ${mediaId} to technology ID ${technology}`);
-
-      
-        router.post(`/technologies/${technology}/attach-media`, {
-            media_id: mediaId,
-        }, {
-            preserveScroll: true,
-            onSuccess: () => {
-                setMediaModalOpen(false);
-                setActiveTechnology(null);
+    // Attach media to technology
+    const attachMediaToTechnology = (technologyId, mediaId) => {
+        router.post(
+            `/technologies/${technologyId}/attach-media`,
+            {
+                media_id: mediaId,
             },
-        });
-        
-    }
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    closeMediaModal();
+                },
+            },
+        );
+    };
+
+    // Pagination labels
+    const paginationLabel = (label) => {
+        if (label.includes('Previous')) {
+            return 'Назад';
+        }
+
+        if (label.includes('Next')) {
+            return 'Вперёд';
+        }
+
+        return label.replace(/&laquo;|&raquo;/g, '');
+    };
+
+    const hasFilters = Boolean(search || categoryId || status);
 
     return (
-        <>
+        <AdminLayout title="Технологии радиосвязи">
             <Head title="Технологии радиосвязи" />
-            <Modal 
-                show={mediaModalOpen}
-                onClose={() => setMediaModalOpen(false)}
-                maxWidth="max-w-6xl"
-                maxHeight="max-h-[90vh]"
-            >
-                <MediaManager 
-                    media={media}
-                    selectedMediaId={activeTechnology?.selected_media_id ?? null}
-                    callBack={(selectedMedia) => {
-                        if (activeTechnology && selectedMedia) {
-                            attachMediaToTechnology(activeTechnology.id, selectedMedia.id);
-                        }
-                    }}
-                />
-            </Modal>
 
-             <Modal
-                            show={isModalOpen}
-                            onClose={() => setIsModalOpen(false)}
-                            title="Добавить термин"
-                        >
-                            {
-                                activeTechnology ?
-                                    <UpdateTechnologyForm
-                                        technology={activeTechnology}
-                                        onClose={() => {
-                                            setActiveTechnology(null);
-                                            setIsModalOpen(false)
-                                        }}
-                                        categories={categories}
-                                    />  
-                                :
-                                <CreateTechnologyForm 
-                                    onClose={() => setIsModalOpen(false)}
-                                    categories={categories}
-                                />
-                            }
-                           
-                        </Modal>
+            <div className="mx-auto w-full max-w-[1600px] space-y-6">
 
-            <div className="space-y-6 p-6">
-                {/* Header */}
+                {/* Page header */}
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+                        <div className="flex items-center gap-2 text-sm text-slate-400">
+                            <span>Справочник</span>
+                            <span>/</span>
+                            <span className="text-indigo-600">Технологии</span>
+                        </div>
+
+                        <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
                             Технологии радиосвязи
                         </h1>
-                        <p className="mt-1 text-sm text-gray-500">
+
+                        <p className="mt-1 text-sm text-slate-500">
                             Управление технологиями и их классификацией
                         </p>
                     </div>
+
                     <button
                         type="button"
-                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700"
-                        onClick={() => setIsModalOpen(true)}
+                        onClick={openCreateModal}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg border border-indigo-700/10 bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-indigo-700 hover:shadow-md active:translate-y-px focus:outline-none focus:ring-4 focus:ring-indigo-100"
                     >
                         <Plus size={18} />
                         Добавить технологию
-                    </button> 
-                  
+                    </button>
+                </div>
+
+                {/* Statistics */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+                    <div className="flex items-center gap-4 rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm shadow-slate-100">
+                        <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                            <Cpu size={22} />
+                        </div>
+
+                        <div>
+                            <p className="text-sm text-slate-500">
+                                Всего технологий
+                            </p>
+
+                            <p className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
+                                {technologies?.total ?? items.length}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm shadow-slate-100">
+                        <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                            <Layers size={22} />
+                        </div>
+
+                        <div>
+                            <p className="text-sm text-slate-500">
+                                Категории
+                            </p>
+
+                            <p className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
+                                {categories.length}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm shadow-slate-100">
+                        <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                            <Image size={22} />
+                        </div>
+
+                        <div>
+                            <p className="text-sm text-slate-500">
+                                На текущей странице
+                            </p>
+
+                            <p className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
+                                {items.length}
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Filters */}
-                <form
-                    onSubmit={applyFilters}
-                    className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
-                >
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                        <div className="md:col-span-2">
-                            <label
-                                htmlFor="search"
-                                className="mb-1.5 block text-sm font-medium text-gray-700"
-                            >
-                                Поиск
-                            </label>
-                            <input
-                                id="search"
-                                type="text"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Название, обозначение или сокращение..."
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                            />
-                        </div>
+                <div className="rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm shadow-slate-100">
 
-                        <div>
-                            <label
-                                htmlFor="category_id"
-                                className="mb-1.5 block text-sm font-medium text-gray-700"
-                            >
-                                Категория
-                            </label>
-                            <select
-                                id="category_id"
-                                value={categoryId}
-                                onChange={(e) => setCategoryId(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                            >
-                                <option value="">Все категории</option>
-                                {categories.map((category) => (
-                                    <option key={category.id} value={category.id}>
-                                        {category.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div>
-                            <label
-                                htmlFor="status"
-                                className="mb-1.5 block text-sm font-medium text-gray-700"
-                            >
-                                Статус
-                            </label>
-                            <select
-                                id="status"
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                            >
-                                <option value="">Все статусы</option>
-                                <option value="draft">Черновик</option>
-                                <option value="published">Опубликовано</option>
-                                <option value="archived">В архиве</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="mt-4 flex flex-wrap justify-end gap-2">
-                        <button
-                            type="button"
-                            onClick={resetFilters}
-                            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-                        >
-                            Сбросить
-                        </button>
-
-                        <button
-                            type="submit"
-                            className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-700"
-                        >
-                            Найти
-                        </button>
-                    </div>
-                </form>
-
-                {/* Table */}
-                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div className="flex flex-col justify-between gap-2 border-b border-gray-200 px-5 py-4 sm:flex-row sm:items-center">
-                        <h2 className="font-semibold text-gray-900">
-                            Список технологий
+                    <div className="mb-4">
+                        <h2 className="text-sm font-semibold text-slate-800">
+                            Поиск и фильтрация
                         </h2>
-                        <p className="text-sm text-gray-500">
-                            Всего: {technologies.total ?? 0}
+
+                        <p className="mt-1 text-xs text-slate-500">
+                            Найдите технологию по названию, категории или статусу
                         </p>
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                                        Технология
-                                    </th>
-                                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                                        Категория
-                                    </th>
-                                    <th className="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-500">
-                                        Термины
-                                    </th>
-                                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                                        Статус
-                                    </th>
-                                    <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                                        Действия
-                                    </th>
-                                </tr>
-                            </thead>
+                    <form onSubmit={applyFilters}>
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
 
-                            <tbody className="divide-y divide-gray-100 bg-white">
-                                {technologies.data.length > 0 ? (
-                                    technologies.data.map((technology) => (
-                                        <tr
-                                            key={technology.id}
-                                            className="transition hover:bg-gray-50"
+                            {/* Search */}
+                            <div className="xl:col-span-2">
+                                <label
+                                    htmlFor="search"
+                                    className="mb-1.5 block text-sm font-medium text-slate-700"
+                                >
+                                    Поиск
+                                </label>
+
+                                <div className="relative">
+                                    <Search
+                                        size={18}
+                                        className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                                    />
+
+                                    <input
+                                        id="search"
+                                        type="text"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        placeholder="Название, обозначение или сокращение..."
+                                        className="h-11 w-full rounded-lg border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-700 outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-300 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Category */}
+                            <div>
+                                <label
+                                    htmlFor="category_id"
+                                    className="mb-1.5 block text-sm font-medium text-slate-700"
+                                >
+                                    Категория
+                                </label>
+
+                                <select
+                                    id="category_id"
+                                    value={categoryId}
+                                    onChange={(e) => setCategoryId(e.target.value)}
+                                    className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition-all hover:border-slate-300 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50"
+                                >
+                                    <option value="">Все категории</option>
+
+                                    {categories.map((category) => (
+                                        <option
+                                            key={category.id}
+                                            value={category.id}
                                         >
-                                            <td className="px-5 py-4">
-                                                <div className="font-medium text-gray-900">
-                                                    {technology.name}
-                                                </div>
+                                            {category.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
-                                                {technology.abbreviation && (
-                                                    <div className="mt-1 text-sm text-gray-500">
-                                                        {technology.abbreviation}
-                                                    </div>
-                                                )}
+                            {/* Status */}
+                            <div>
+                                <label
+                                    htmlFor="status"
+                                    className="mb-1.5 block text-sm font-medium text-slate-700"
+                                >
+                                    Статус
+                                </label>
 
-                                                {technology.slug && (
-                                                    <div className="mt-1 text-xs text-gray-400">
-                                                        {technology.slug}
-                                                    </div>
-                                                )}
-                                            </td>
+                                <select
+                                    id="status"
+                                    value={status}
+                                    onChange={(e) => setStatus(e.target.value)}
+                                    className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition-all hover:border-slate-300 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50"
+                                >
+                                    <option value="">Все статусы</option>
+                                    <option value="draft">Черновик</option>
+                                    <option value="published">Опубликовано</option>
+                                    <option value="archived">В архиве</option>
+                                </select>
+                            </div>
+                        </div>
 
-                                            <td className="px-5 py-4 text-sm text-gray-600">
-                                                {technology.category?.name ?? '—'}
-                                            </td>
+                        {/* Filter buttons */}
+                        <div className="mt-5 flex flex-wrap justify-end gap-2">
+                            {hasFilters && (
+                                <button
+                                    type="button"
+                                    onClick={resetFilters}
+                                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+                                >
+                                    <X size={16} />
+                                    Сбросить
+                                </button>
+                            )}
 
-                                            <td className="px-5 py-4 text-center">
-                                                <span className="inline-flex min-w-8 items-center justify-center rounded-full bg-gray-100 px-2.5 py-1 text-sm font-medium text-gray-700">
-                                                    {technology.terms_count ?? 0}
-                                                </span>
-                                            </td>
+                            <button
+                                type="submit"
+                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-700 active:translate-y-px"
+                            >
+                                <Search size={16} />
+                                Найти
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
-                                            <td className="px-5 py-4">
-                                                <StatusBadge status={technology.status} />
-                                            </td>
+                {/* Technologies table */}
+                <div className="overflow-hidden rounded-xl border border-slate-200/70 bg-white shadow-sm shadow-slate-100">
 
-                                            <td className="px-5 py-4">
-                                                <div className="flex items-center justify-end gap-3">
-                                                    <button
-                                                        className="inline-flex items-center justify-center rounded border border-amber-200 bg-amber-50 p-2 text-amber-600 shadow-sm transition-all duration-200 hover:border-amber-300 hover:bg-amber-500 hover:text-white hover:shadow-md active:scale-95"
-                                                        onClick={() => {
-                                                                setMediaModalOpen(true)
-                                                                setActiveTechnology(technology);
-                                                            }
-                                                        }
+                    {/* Table heading */}
+                    <div className="flex flex-col justify-between gap-2 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-center sm:px-6">
+                        <div>
+                            <h2 className="text-base font-bold text-slate-900">
+                                Список технологий
+                            </h2>
 
-                                                    >
-                                                        Thuumb       
-                                                    </button>
-                                                    <button
-                                                        onClick={() => 
-                                                            {
-                                                                setActiveTechnology(technology);
-                                                                setIsModalOpen(true);
-                                                            }
-                                                        }
-                                                          className="inline-flex items-center justify-center rounded border border-amber-200 bg-amber-50 p-2 text-amber-600 shadow-sm transition-all duration-200 hover:border-amber-300 hover:bg-amber-500 hover:text-white hover:shadow-md active:scale-95"
-                                                    >
-                                                        <Pencil size={17} />
-                                                    </button>
-                                                     <button
-                                                        onClick={()=>deleteTechnology(technology)}
-                                                           className="inline-flex items-center justify-center rounded border border-red-200 bg-red-50 p-2 text-amber-600 shadow-sm transition-all duration-200 hover:border-red-300 hover:bg-red-500 hover:text-white hover:shadow-md active:scale-95"
-                                                    >
-                                                        <Trash size={17} />
-                                                    </button>
-                                                    
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td
-                                            colSpan="5"
-                                            className="px-5 py-16 text-center"
-                                        >
-                                            <div className="text-sm font-medium text-gray-700">
-                                                Технологии не найдены
-                                            </div>
-                                            <p className="mt-1 text-sm text-gray-500">
-                                                Измените параметры поиска или добавьте новую технологию.
-                                            </p>
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
+                            <p className="mt-1 text-sm text-slate-500">
+                                Зарегистрированные технологии радиосвязи
+                            </p>
+                        </div>
+
+                        <span className="inline-flex w-fit items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600 ring-1 ring-inset ring-slate-200">
+                            <span className="size-2 rounded-full bg-indigo-500" />
+                            {technologies?.total ?? 0} записей
+                        </span>
                     </div>
 
-                    {/* Pagination */}
-                    {technologies.links?.length > 3 && (
-                        <div className="flex flex-col gap-3 border-t border-gray-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                            <p className="text-sm text-gray-500">
-                                Показано {technologies.from ?? 0}–{technologies.to ?? 0}
-                                {' '}из {technologies.total ?? 0}
+                    {/* Table content */}
+                    {items.length > 0 ? (
+                        <>
+                            <div className="overflow-x-auto">
+                                <table className="w-full min-w-[900px] text-left text-sm">
+
+                                    <thead>
+                                        <tr className="border-b border-slate-100 bg-slate-50/60">
+                                            <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                                                Технология
+                                            </th>
+
+                                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                                                Категория
+                                            </th>
+
+                                            <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-400">
+                                                Термины
+                                            </th>
+
+                                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                                                Статус
+                                            </th>
+
+                                            <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-400">
+                                                Действия
+                                            </th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody className="divide-y divide-slate-100">
+                                        {items.map((technology) => (
+                                            <tr
+                                                key={technology.id}
+                                                className="group transition-colors hover:bg-slate-50/80"
+                                            >
+                                                {/* Technology */}
+                                                <td className="px-6 py-4">
+                                                    <div className="font-semibold text-slate-800 transition group-hover:text-indigo-700">
+                                                        {technology.name}
+                                                    </div>
+
+                                                    {technology.abbreviation && (
+                                                        <div className="mt-1 text-xs font-medium text-slate-500">
+                                                            {technology.abbreviation}
+                                                        </div>
+                                                    )}
+
+                                                    {technology.slug && (
+                                                        <div className="mt-1 text-xs text-slate-400">
+                                                            {technology.slug}
+                                                        </div>
+                                                    )}
+                                                </td>
+
+                                                {/* Category */}
+                                                <td className="px-5 py-4 text-sm text-slate-600">
+                                                    {technology.category?.name ?? '—'}
+                                                </td>
+
+                                                {/* Terms count */}
+                                                <td className="px-5 py-4 text-center">
+                                                    <span className="inline-flex min-w-9 items-center justify-center rounded-lg bg-slate-100 px-2.5 py-1.5 text-sm font-semibold tabular-nums text-slate-700">
+                                                        {technology.terms_count ?? 0}
+                                                    </span>
+                                                </td>
+
+                                                {/* Status */}
+                                                <td className="px-5 py-4">
+                                                    <StatusBadge status={technology.status} />
+                                                </td>
+
+                                                {/* Actions */}
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center justify-end gap-1.5">
+
+                                                        {/* Media */}
+                                                        <button
+                                                            type="button"
+                                                            title="Управление изображениями"
+                                                            onClick={() => openMediaModal(technology)}
+                                                            className="inline-flex size-9 items-center justify-center rounded-lg border border-transparent text-slate-400 transition-all duration-200 hover:border-violet-100 hover:bg-violet-50 hover:text-violet-600"
+                                                        >
+                                                            <Image size={17} />
+                                                        </button>
+
+                                                        {/* Edit */}
+                                                        <button
+                                                            type="button"
+                                                            title="Редактировать"
+                                                            onClick={() => openEditModal(technology)}
+                                                            className="inline-flex size-9 items-center justify-center rounded-lg border border-transparent text-slate-400 transition-all duration-200 hover:border-amber-100 hover:bg-amber-50 hover:text-amber-600"
+                                                        >
+                                                            <Pencil size={17} />
+                                                        </button>
+
+                                                        {/* Delete */}
+                                                        <button
+                                                            type="button"
+                                                            title="Удалить"
+                                                            onClick={() => deleteTechnology(technology)}
+                                                            className="inline-flex size-9 items-center justify-center rounded-lg border border-transparent text-slate-400 transition-all duration-200 hover:border-red-100 hover:bg-red-50 hover:text-red-600"
+                                                        >
+                                                            <Trash2 size={17} />
+                                                        </button>
+
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Pagination */}
+                            {links.length > 3 && (
+                                <div className="flex flex-col justify-between gap-4 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:px-6">
+
+                                    <p className="text-sm text-slate-500">
+                                        Показано{' '}
+                                        <span className="font-semibold text-slate-700">
+                                            {technologies?.from ?? 0}–{technologies?.to ?? 0}
+                                        </span>
+                                        {' '}из{' '}
+                                        <span className="font-semibold text-slate-700">
+                                            {technologies?.total ?? 0}
+                                        </span>
+                                    </p>
+
+                                    <div className="flex flex-wrap items-center gap-1.5">
+                                        {links.map((link, index) => {
+                                            const label = paginationLabel(link.label);
+
+                                            return (
+                                                <button
+                                                    key={`${index}-${link.label}`}
+                                                    type="button"
+                                                    disabled={!link.url || link.active}
+                                                    onClick={() => {
+                                                        if (link.url) {
+                                                            router.visit(link.url, {
+                                                                preserveScroll: true,
+                                                                preserveState: true,
+                                                            });
+                                                        }
+                                                    }}
+                                                    className={`inline-flex h-9 min-w-9 items-center justify-center rounded-lg border px-3 text-sm font-medium transition ${
+                                                        link.active
+                                                            ? 'border-indigo-600 bg-indigo-600 text-white shadow-sm'
+                                                            : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600'
+                                                    } disabled:cursor-not-allowed disabled:opacity-40`}
+                                                >
+                                                    {label.includes('Назад') ? (
+                                                        <ChevronLeft size={16} />
+                                                    ) : label.includes('Вперёд') ? (
+                                                        <ChevronRight size={16} />
+                                                    ) : (
+                                                        label
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    ) : (
+                        /* Empty state */
+                        <div className="flex flex-col items-center px-6 py-20 text-center">
+                            <div className="flex size-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                                <Cpu size={28} strokeWidth={1.5} />
+                            </div>
+
+                            <h3 className="mt-5 text-base font-semibold text-slate-800">
+                                Технологии не найдены
+                            </h3>
+
+                            <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
+                                По заданным параметрам ничего не найдено.
+                                Попробуйте изменить фильтры или добавьте новую технологию.
                             </p>
 
-                            <div className="flex flex-wrap gap-1">
-                                {technologies.links.map((link, index) => (
-                                    <button
-                                        key={`${index}-${link.label}`}
-                                        type="button"
-                                        disabled={!link.url || link.active}
-                                        onClick={() => {
-                                            if (link.url) {
-                                                router.visit(link.url, {
-                                                    preserveScroll: true,
-                                                    preserveState: true,
-                                                });
-                                            }
-                                        }}
-                                        className={`min-w-9 rounded-lg px-3 py-2 text-sm transition ${
-                                            link.active
-                                                ? 'bg-indigo-600 font-semibold text-white'
-                                                : link.url
-                                                  ? 'border border-gray-200 text-gray-700 hover:bg-gray-50'
-                                                  : 'cursor-not-allowed text-gray-300'
-                                        }`}
-                                    >
-                                        {paginationLabel(link.label)}
-                                    </button>
-                                ))}
-                            </div>
+                            {hasFilters && (
+                                <button
+                                    type="button"
+                                    onClick={resetFilters}
+                                    className="mt-5 text-sm font-semibold text-indigo-600 transition hover:text-indigo-700"
+                                >
+                                    Сбросить фильтры
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>
             </div>
-        </>
+
+            {/* Create / Update technology modal */}
+            <Modal
+                show={isModalOpen}
+                onClose={closeTechnologyModal}
+                title={activeTechnology ? 'Редактировать технологию' : 'Добавить технологию'}
+            >
+                {activeTechnology ? (
+                    <UpdateTechnologyForm
+                        technology={activeTechnology}
+                        onClose={closeTechnologyModal}
+                        categories={categories}
+                    />
+                ) : (
+                    <CreateTechnologyForm
+                        onClose={closeTechnologyModal}
+                        categories={categories}
+                    />
+                )}
+            </Modal>
+
+            {/* Media manager modal */}
+            <Modal
+                show={mediaModalOpen}
+                onClose={closeMediaModal}
+                maxWidth="max-w-6xl"
+                maxHeight="max-h-[90vh]"
+            >
+                <MediaManager
+                    media={media}
+                    selectedMediaId={
+                        activeTechnology?.selected_media_id ??
+                        selected_media_id ??
+                        null
+                    }
+                    callBack={(selectedMedia) => {
+                        if (activeTechnology && selectedMedia) {
+                            attachMediaToTechnology(
+                                activeTechnology.id,
+                                selectedMedia.id,
+                            );
+                        }
+                    }}
+                />
+            </Modal>
+        </AdminLayout>
     );
 }
 
+// Status badge
 function StatusBadge({ status }) {
     const styles = {
         draft: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-        published: 'bg-green-50 text-green-700 ring-green-600/20',
-        archived: 'bg-gray-100 text-gray-600 ring-gray-500/20',
+        published: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+        archived: 'bg-slate-100 text-slate-600 ring-slate-500/20',
     };
 
     const labels = {
@@ -433,10 +639,11 @@ function StatusBadge({ status }) {
 
     return (
         <span
-            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${
-                styles[status] ?? styles.draft
+            className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold ring-1 ring-inset ${
+                styles[status] ?? 'bg-slate-100 text-slate-600 ring-slate-500/20'
             }`}
         >
+            <span className="size-1.5 rounded-full bg-current" />
             {labels[status] ?? status ?? '—'}
         </span>
     );

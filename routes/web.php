@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\TechnologyController;
 use App\Http\Controllers\Admin\TechnologyCategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\MediaController;
+use App\Http\Controllers\Admin\DashboardController;
 
 //use App\Models\User;
 use App\Domain\Users\Models\User;
@@ -59,23 +60,8 @@ Route::get('/about', fn () => Inertia::render('About'))
     */
 
 
-
-
-
-//Route::middleware('auth')->group(function () {
-   Route::get('/fake-login', function () {
-        abort_unless(app()->environment('local'), 404);
-
-        $user = User::where('email', 'test@example.com')->firstOrFail();
-
-        Auth::login($user);
-
-        request()->session()->regenerate();
-
-        return redirect('/dashboard');
-        
-    });
-
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', DashboardController::class)->name('dashboard');
 
    Route::get('/terms', [TermController::class, 'index'])
     ->name('terms.index'); 
@@ -92,20 +78,11 @@ Route::get('/about', fn () => Inertia::render('About'))
     Route::delete('/terms/{term}', [TermController::class, 'destroy'])
     ->name('terms.destroy');
 
-    /*
-        Route::resource('terms', TermController::class)
-        ->only(['index', 'show', 'store', 'update', 'destroy']);
-    */
-
-
     Route::get('/terms/{term}/edit', [TermController::class, 'edit'])
         ->name('terms.edit');    
 
     Route::post('terms/{id}/restore', [TermController::class, 'restore'])
         ->name('terms.restore');
-
-
-
 
     //Source
     Route::get('/source', [SourceController::class, 'index'])
@@ -124,19 +101,14 @@ Route::get('/about', fn () => Inertia::render('About'))
     Route::get('/technologies', [TechnologyController::class, 'index'])
     ->name('technologies.index');
 
-
-
     Route::post('/technologies', [TechnologyController::class, 'store'])
     ->name('technologies.store');
-
 
     Route::put('/technologies/{technology}', [TechnologyController::class, 'update'])
     ->name('technologies.update');
 
-
     Route::delete('/technologies/{technology}', [TechnologyController::class, 'destroy'])
     ->name('technologies.destroy');
-
 
     Route::get('/technology-categories',[TechnologyCategoryController::class, 'index'])
      ->name('technology-categories.index');
@@ -149,7 +121,6 @@ Route::get('/about', fn () => Inertia::render('About'))
 
     Route::delete('/technology-categories/{technologyCategory}',[TechnologyCategoryController::class, 'destroy'])
     ->name('technology-categories.destroy');
-
 
     Route::post('/technologies/{technology}/attach-media',[TechnologyController::class, 'attachMedia'])->name('technologies.attach-media');
    //technologies/1/attach-media
@@ -171,6 +142,26 @@ Route::get('/about', fn () => Inertia::render('About'))
     Route::delete('/media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
     Route::get('/technologies/{technology}/edit',[TechnologyController::class, 'edit'])->name('admin.technologies.edit');
     
+
+
+});
+
+
+//Route::middleware('auth')->group(function () {
+   Route::get('/fake-login', function () {
+        abort_unless(app()->environment('local'), 404);
+
+        $user = User::where('email', 'test@example.com')->firstOrFail();
+
+        Auth::login($user);
+
+        request()->session()->regenerate();
+
+        return redirect('/dashboard');
+        
+    });
+
+
     /*
     Route::get('/media-make',function(){
        App\Domain\Media\Models\MediaLibrary::firstOrCreate(
