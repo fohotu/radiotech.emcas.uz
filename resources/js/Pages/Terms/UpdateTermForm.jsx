@@ -53,7 +53,7 @@ export default function UpdateTermForm({ term, onClose }) {
     const submit = (event) => {
         event.preventDefault();
 
-        put(`/terms/${term.id}`, {
+        put(`/admin/terms/${term.id}`, {
             preserveScroll: true,
             onSuccess: () => {
                 reset();

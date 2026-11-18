@@ -133,6 +133,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
 
+
+
+    Route::put('/users/{user}/update-info', [UserController::class, 'updateInfo'])->name('users.update-info');
+    Route::put('/users/{user}/update-password', [UserController::class, 'updatePassword'])->name('users.update-password');
+    Route::put('/users/{user}/update-role', [UserController::class, 'updateRole'])->name('users.update-role');
+    Route::put('/users/{user}/update-status', [UserController::class, 'updateStatus'])->name('users.update-status');
     //MediaUploader
 
     Route::post('/media/{modelType}/{modelId}',[MediaController::class, 'store'])->name('admin.media.store');
@@ -151,7 +157,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
    Route::get('/fake-login', function () {
         abort_unless(app()->environment('local'), 404);
 
-        $user = User::where('email', 'test@example.com')->firstOrFail();
+        $user = User::where('email', 'test19045@mmail.com')->firstOrFail();
 
         Auth::login($user);
 

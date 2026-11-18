@@ -14,7 +14,7 @@ export default function UpdateUserForm({ user, onClose }) {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        put(`/users/${user.id}`, {
+        put(`/admin/users/${user.id}/update-info`, {
             preserveScroll: true,
             onSuccess: () => {
                 onClose();

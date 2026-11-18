@@ -34,7 +34,7 @@ export const swalConfirm = async (title = 'Вы уверены?', text = 'Это
         showCancelButton: true,
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Да, удалить!',
+        confirmButtonText: 'Да, выполнить!',
         cancelButtonText: 'Отмена',
     });
 

@@ -57,7 +57,7 @@ export default function CreateTermForm({ onClose }) {
     const submit = (event) => {
         event.preventDefault();
 
-        post('/terms', {
+        post('/admin/terms', {
             preserveScroll: true,
             onSuccess: (res) => {
                 reset();

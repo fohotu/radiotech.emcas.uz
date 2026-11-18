@@ -90,17 +90,11 @@ export default function CreateTechnologyForm({ categories = [] }) {
     const translationError = (field) =>
         errors[`translations.${activeLocale}.${field}`];
 
-    const submit1 = (e) => {
-        e.preventDefault();
-        //console.log(data);
-        post('/technologies');
-    };
-
 
     const submit = (event) => {
             event.preventDefault();
     
-            post('/technologies', {
+            post('/admin/technologies', {
                 preserveScroll: true,
                 onSuccess: (res) => {
                     reset();
@@ -124,7 +118,7 @@ export default function CreateTechnologyForm({ categories = [] }) {
                 <div>
                     <div className="mb-2 text-sm text-gray-500">
                         <Link
-                            href="/technologies"
+                            href="/admin/technologies"
                             className="hover:text-indigo-600"
                         >
                             Технологии
@@ -494,7 +488,7 @@ export default function CreateTechnologyForm({ categories = [] }) {
 
                     <div className="flex flex-col-reverse gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:justify-end">
                         <Link
-                            href="/technologies"
+                            href="/admin/technologies"
                             className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
                         >
                             Отмена

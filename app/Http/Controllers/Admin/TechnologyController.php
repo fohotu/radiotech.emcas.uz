@@ -20,6 +20,8 @@ use App\Http\Requests\Technology\UpdateTechnologyRequest;
 use App\Http\Requests\Technology\AttachMediaRequest;
 use Illuminate\Http\RedirectResponse;
 
+use Illuminate\Support\Str;
+
 class TechnologyController extends Controller
 {
     public function index(Request $request,SearchTechnologies $query,MediaQuery $mediaQuery): Response {
@@ -39,6 +41,8 @@ class TechnologyController extends Controller
             //'model_type' => Technology::class,
         ]);
 
+        
+
         $media = $media->map(fn ($media) => [
             'id' => $media->id,
             'name' => $media->name,
@@ -51,7 +55,7 @@ class TechnologyController extends Controller
                 : $media->getUrl(),
         ])->values();
 
-        
+     
 
         return Inertia::render('Technologies/Index', [
             'technologies' => $query->execute($filters),
@@ -65,26 +69,19 @@ class TechnologyController extends Controller
 
     }
 
-
-
     public function store(StoreTechnologyRequest $request,CreateTechnology $action): RedirectResponse {
-        
-       // dd($request);
         $action->execute($request->validated());
         return redirect()->back()->with('success','Технология успешно создана!');
-
     }
-
 
     public function update(UpdateTechnologyRequest $request,Technology $technology,UpdateTechnology $action) {
         $action->execute($technology,$request->validated());
-        return redirect()->route('technologies.index')->with('success', 'Technology updated successfully');
-    }
-
+        return redirect()->route('admin.technologies.index')->with('success', 'Technology updated successfully');
+    }    
 
     public function destroy(Technology $technology,DeleteTechnology $action): RedirectResponse {
         $action->execute($technology);
-        return redirect()->route('technologies.index')->with('success', 'Technology deleted successfully.');
+        return redirect()->route('admin.technologies.index')->with('success', 'Technology deleted successfully.');
     }
 
 
@@ -107,14 +104,12 @@ class TechnologyController extends Controller
                             : $media->getUrl(),
                     ])
                     ->values(),
-            ],
+            ], 
         ]);
     }
-
     
     public function attachMedia(AttachMediaRequest $request,Technology $technology,AttachMediaToTechnology $action) {    
        //dd($technology,$request->validated('media_id'));
-
         $action->execute($technology,$request->validated('media_id'));
         return back()->with('success', 'Image attached successfully.');
     }

@@ -11,9 +11,9 @@ export default function CreateUserForm({ onClose }) {
     });
 
     const handleSubmit = (e) => {
-        e.preventDefault();
+        e.preventDefault(); 
 
-        post('/users', {
+        post('/admin/users', {
             preserveScroll: true,
             onSuccess: () => {
                 reset();

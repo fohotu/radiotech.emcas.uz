@@ -49,7 +49,7 @@ export default function Index({ terms, filters = {} }) {
         e.preventDefault();
 
         router.get(
-            '/terms',
+            '/admin/terms',
             { search, status },
             {
                 preserveState: true,
@@ -63,7 +63,7 @@ export default function Index({ terms, filters = {} }) {
         setStatus(value);
 
         router.get(
-            '/terms',
+            '/admin/terms',
             { search, status: value },
             {
                 preserveState: true,
@@ -93,7 +93,7 @@ export default function Index({ terms, filters = {} }) {
         setStatus('');
 
         router.get(
-            '/terms',
+            '/admin/terms',
             {},
             {
                 preserveState: true,
@@ -111,7 +111,7 @@ export default function Index({ terms, filters = {} }) {
 
         if (!confirmed) return;
 
-        router.delete(`/terms/${termId}`, {
+        router.delete(`/admin/terms/${termId}`, {
             preserveScroll: true,
             onSuccess: () => swalSuccess('Термин успешно удален'),
             onError: () => swalError('Ошибка при удалении термина'),
@@ -345,13 +345,17 @@ export default function Index({ terms, filters = {} }) {
 
                                                     <td className="px-6 py-4">
                                                         <div className="flex justify-end gap-1.5">
-                                                            <Link
-                                                                href={`/terms/show/${term.id}`}
-                                                                title="Просмотреть"
-                                                                className="inline-flex size-9 items-center justify-center rounded text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
-                                                            >
-                                                                <Eye size={17} />
-                                                            </Link>
+                                                            {
+                                                            /*
+                                                                <Link
+                                                                    href={`/terms/show/${term.id}`}
+                                                                    title="Просмотреть"
+                                                                    className="inline-flex size-9 items-center justify-center rounded text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
+                                                                >
+                                                                    <Eye size={17} />
+                                                                </Link>
+                                                            */
+                                                            }
 
                                                             <button
                                                                 type="button"

@@ -52,7 +52,7 @@ class TermController extends Controller
 
     public function destroy(Term $term,DeleteTerm $action): RedirectResponse {
         $action->execute($term);
-        return to_route('terms.index')
+        return to_route('admin.terms.index')
             ->with('success', 'Термин удалён.');
     }
 

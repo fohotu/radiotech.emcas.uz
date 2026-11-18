@@ -29,6 +29,9 @@ export default function Index({
     media,
     selected_media_id,
 }) {
+
+    console.log(technologies);
+
     const [search, setSearch] = useState(filters.search ?? '');
     const [categoryId, setCategoryId] = useState(filters.category_id ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
@@ -51,7 +54,7 @@ export default function Index({
         e.preventDefault();
 
         router.get(
-            '/technologies',
+            '/admin/technologies',
             {
                 search: search || undefined,
                 category_id: categoryId || undefined,
@@ -73,7 +76,7 @@ export default function Index({
         setStatus('');
 
         router.get(
-            '/technologies',
+            '/admin/technologies',
             {},
             {
                 preserveState: true,
@@ -119,7 +122,7 @@ export default function Index({
             return;
         }
 
-        router.delete(`/technologies/${technology.id}`, {
+        router.delete(`/admin/technologies/${technology.id}`, {
             preserveScroll: true,
         });
     };
@@ -127,7 +130,7 @@ export default function Index({
     // Attach media to technology
     const attachMediaToTechnology = (technologyId, mediaId) => {
         router.post(
-            `/technologies/${technologyId}/attach-media`,
+            `/admin/technologies/${technologyId}/attach-media`,
             {
                 media_id: mediaId,
             },
@@ -384,31 +387,22 @@ export default function Index({
                         <>
                             <div className="overflow-x-auto">
                                 <table className="w-full min-w-[900px] text-left text-sm">
-
                                     <thead>
                                         <tr className="border-b border-slate-100 bg-slate-50/60">
                                             <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
                                                 Технология
                                             </th>
-
                                             <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
                                                 Категория
                                             </th>
-
-                                            <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-400">
-                                                Термины
-                                            </th>
-
                                             <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
                                                 Статус
                                             </th>
-
                                             <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-400">
                                                 Действия
                                             </th>
                                         </tr>
                                     </thead>
-
                                     <tbody className="divide-y divide-slate-100">
                                         {items.map((technology) => (
                                             <tr
@@ -436,15 +430,10 @@ export default function Index({
 
                                                 {/* Category */}
                                                 <td className="px-5 py-4 text-sm text-slate-600">
-                                                    {technology.category?.name ?? '—'}
+                                                    {technology.category_name ?? '—'}
                                                 </td>
 
-                                                {/* Terms count */}
-                                                <td className="px-5 py-4 text-center">
-                                                    <span className="inline-flex min-w-9 items-center justify-center rounded-lg bg-slate-100 px-2.5 py-1.5 text-sm font-semibold tabular-nums text-slate-700">
-                                                        {technology.terms_count ?? 0}
-                                                    </span>
-                                                </td>
+                                               
 
                                                 {/* Status */}
                                                 <td className="px-5 py-4">

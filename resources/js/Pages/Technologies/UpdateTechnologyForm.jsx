@@ -47,6 +47,8 @@ export default function UpdateTechnologyForm({
     categories = [],
 }) {
 
+    console.log('UpdateTechnologyForm props:', { technology, categories });
+
     const [activeLocale, setActiveLocale] = useState('ru');
 
     const { data, setData, put, processing, errors,reset } = useForm({
@@ -75,7 +77,7 @@ export default function UpdateTechnologyForm({
     const submit = (event) => {
         event.preventDefault();
 
-        put(`/technologies/${technology.id}`, {
+        put(`/admin/technologies/${technology.id}`, {
             preserveScroll: true,
              onSuccess: () => {
                 reset();
@@ -426,7 +428,7 @@ export default function UpdateTechnologyForm({
 
                     <div className="flex flex-col-reverse gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:justify-end">
                         <Link
-                            href="/technologies"
+                            href="/admin/technologies"
                             className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
                         >
                             Отмена

@@ -8,6 +8,11 @@ import Modal from '@/Components/Modal';
 import CreateUserForm from './CreateUserForm';
 import UpdateUserForm from './UpdateUserForm';
 
+import PersonalInfoForm from './PersonalInfoForm';
+import ChangePasswordForm from './ChangePasswordForm';
+import ChangeRoleForm from './ChangeRoleForm';
+
+import { swalSuccess, swalError,swalConfirm } from '../../Utils/swal';
 import {
     Search,
     Plus,
@@ -20,14 +25,20 @@ import {
     UserLock,
     UsersRound,
     RotateCcw,
+    LockOpen
 } from 'lucide-react';
 
 export default function Index({ users, filters = {} }) {
+
+
+    
     const [search, setSearch] = useState(filters.search || '');
 
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+
+    const [activeTab, setActiveTab] = useState(null);
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -57,23 +68,84 @@ export default function Index({ users, filters = {} }) {
         );
     };
 
-    const openUpdateModal = (user) => {
+    const openUpdateModal = (user, type) => {
         setSelectedUser(user);
-        setShowUpdateModal(true);
+        setActiveTab(type);
+       
     };
 
     const closeUpdateModal = () => {
-        setShowUpdateModal(false);
+      
+        setActiveTab(null);
         setSelectedUser(null);
     };
 
-    const handleDelete = (user) => {
+    const onSuccess = (message) => {
+        setActiveTab(null);
+        setSelectedUser(null);
+        swalSuccess(message);
+        router.reload({ preserveScroll: true });
+    };
+    
+    const onError = (message) => {
+        swalError(message);
+    }
+
+    const unblockUser = (user) => {
+        blockUser(user,'active','User unblocked successfully')
+    }
+
+    const blockUser = (user,status="blocked",message="'User blocked successfully'") => {
+        swalConfirm('Are you sure you want to block this user?','This action will prevent the user from logging in.')
+            .then((result) => {
+                
+                if (result) {
+                    router.put(`/admin/users/${user.id}/update-status`, {
+                        status: status
+                    }, {
+                        preserveScroll: true,
+                        onSuccess: () => {
+                           
+                            swalSuccess(message);
+                            router.reload({ preserveScroll: true });
+                        },
+                        onError: () => {
+                            swalError('Error blocking user');
+                        },
+                    });
+                }
+            });
+    };
+
+    const handleDelete1 = (user) => {
         if (!window.confirm(`Are you sure you want to delete "${user.name}"?`)) {
             return;
         }
 
         router.delete(`/users/${user.id}`, {
             preserveScroll: true,
+        });
+    };
+
+
+    const handleDelete = (user) => {
+        swalConfirm(
+            `Are you sure you want to delete "${user.name}"?`,
+            'This action cannot be undone.'
+        ).then((result) => {
+            
+            if (result) {
+                router.delete(`/admin/users/${user.id}`, {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        swalSuccess('User deleted successfully');
+                        router.reload({ preserveScroll: true });
+                    },
+                    onError: () => {
+                        swalError('Error deleting user');
+                    },
+                });
+            }
         });
     };
 
@@ -260,9 +332,15 @@ export default function Index({ users, filters = {} }) {
                             <tbody className="divide-y divide-slate-100">
                                 {userItems.length > 0 ? (
                                     userItems.map((user, index) => (
+
+
                                         <tr
                                             key={user.id}
-                                            className="transition hover:bg-slate-50/70"
+                                            className={`transition ${
+                                                user.status === 'blocked'
+                                                    ? 'bg-red-50 hover:bg-red-100/70'
+                                                    : 'hover:bg-slate-50/70'
+                                            }`}
                                         >
                                             <td className="whitespace-nowrap px-5 py-4 text-slate-400">
                                                 {(users.from ?? 1) + index}
@@ -307,7 +385,7 @@ export default function Index({ users, filters = {} }) {
 
                                                     <button
                                                         type="button"
-                                                        onClick={() => openUpdateModal(user)}
+                                                        onClick={() => openUpdateModal(user, 'info')}
                                                         title="Редактировать"
                                                         className="inline-flex h-8 w-8 items-center
                                                             justify-center rounded-lg bg-indigo-50
@@ -318,8 +396,8 @@ export default function Index({ users, filters = {} }) {
 
                                                     <button
                                                         type="button"
-                                                        onClick={() => openUpdateModal(user)}
-                                                        title="Управление доступом"
+                                                        onClick={() => openUpdateModal(user, 'password')}
+                                                        title="Управление паролем"
                                                         className="inline-flex h-8 w-8 items-center
                                                             justify-center rounded-lg bg-amber-50
                                                             text-amber-600 transition hover:bg-amber-100"
@@ -329,7 +407,7 @@ export default function Index({ users, filters = {} }) {
 
                                                     <button
                                                         type="button"
-                                                        onClick={() => openUpdateModal(user)}
+                                                        onClick={() => openUpdateModal(user, 'role')}
                                                         title="Управление ролями"
                                                         className="inline-flex h-8 w-8 items-center
                                                             justify-center rounded-lg bg-blue-50
@@ -338,15 +416,27 @@ export default function Index({ users, filters = {} }) {
                                                         <UsersRound size={15} />
                                                     </button>
 
-                                                    <button
+                                                    
+
+                                                   <button
                                                         type="button"
-                                                        onClick={() => openUpdateModal(user)}
-                                                        title="Блокировка пользователя"
-                                                        className="inline-flex h-8 w-8 items-center
-                                                            justify-center rounded-lg bg-orange-50
-                                                            text-orange-600 transition hover:bg-orange-100"
+                                                        onClick={() =>user.status === 'blocked' ? unblockUser(user): blockUser(user)
+                                                        }
+                                                        title={user.status === 'blocked'
+                                                            ? 'Разблокировать пользователя'
+                                                            : 'Заблокировать пользователя'
+                                                        }
+                                                        className={`inline-flex h-8 w-8 items-center justify-center rounded-lg transition ${
+                                                            user.status === 'blocked'
+                                                                ? 'bg-green-50 text-green-600 hover:bg-green-100'
+                                                                : 'bg-orange-50 text-orange-600 hover:bg-orange-100'
+                                                        }`}
                                                     >
-                                                        <Lock size={15} />
+                                                        {user.status === 'blocked' ? (
+                                                            <LockOpen size={15} />
+                                                        ) : (
+                                                            <Lock size={15} />
+                                                        )}
                                                     </button>
 
                                                     <button
@@ -456,11 +546,41 @@ export default function Index({ users, filters = {} }) {
             <Modal
                 show={showUpdateModal}
                 onClose={closeUpdateModal}
+                
             >
                 {selectedUser && (
                     <UpdateUserForm
                         user={selectedUser}
                         onClose={closeUpdateModal}
+                    />
+                )}
+            </Modal>
+
+            <Modal
+                show={activeTab !== null}
+                onClose={closeUpdateModal}
+            >
+                {activeTab === 'info' && (
+                    <PersonalInfoForm 
+                        user={selectedUser}
+                        onSucess={onSuccess} 
+                        onError={onError} 
+                    />
+                )}
+
+                {activeTab === 'password' && (
+                    <ChangePasswordForm 
+                        user={selectedUser}
+                        onSucess={onSuccess} 
+                        onError={onError} 
+                     />
+                )}
+
+                {activeTab === 'role' && (
+                    <ChangeRoleForm 
+                        user={selectedUser}
+                        onSucess={onSuccess} 
+                        onError={onError} 
                     />
                 )}
             </Modal>
